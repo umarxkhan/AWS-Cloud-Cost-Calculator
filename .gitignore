@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+
+# Terraform
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# AWS Lambda / Node / build artifacts
+*.zip
+node_modules/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+crash.log
+
+# Backup files created by editors
+*~
+*.bak
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db

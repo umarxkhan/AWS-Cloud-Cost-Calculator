@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cloud Cost Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-color: #1e293b;
+            --text-color: #e2e8f0;
+            --accent-color: #3b82f6;
+            --muted-color: #64748b;
+            --warn-color: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background-color: #334155;
+            border-radius: 8px;
+            padding: 1rem;
+            width: 48%;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        .stat h3 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: #334155;
+            border-radius: 10px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--accent-color);
+            width: 0%;
+            text-align: right;
+            padding-right: 5px;
+            line-height: 20px;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .top-services span {
+            display: block;
+            margin: 0.3rem 0;
+        }
+
+        .cluster-list {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .cluster-services {
+            font-size: 0.8rem;
+            color: var(--muted-color);
+            margin-left: 1.2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>☁️ AWS Cloud Cost Dashboard</h1>
+        <p>Monitor, analyze, and forecast your AWS spending</p>
+    </header>
+
+    <section class="grid">
+        <!-- Overview Card -->
+        <div class="card">
+            <h2>Overview</h2>
+            <div class="stats">
+                <div class="stat">
+                    <h3 id="totalSpend">€0</h3>
+                    <p>Total Spend</p>
+                </div>
+                <div class="stat">
+                    <h3 id="threshold">€500</h3>
+                    <p>Budget Threshold</p>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div id="spendProgress" class="progress">0%</div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="card">
+            <h2>Cost Breakdown by Category</h2>
+            <canvas id="categoryChart"></canvas>
+            <div id="clusterList" class="cluster-list"></div>
+        </div>
+
+        <!-- Trend & Forecast -->
+        <div class="card">
+            <h2>Spending Trend (Last 14 Days + Forecast)</h2>
+            <canvas id="trendChart"></canvas>
+        </div>
+
+        <!-- Top Services -->
+        <div class="card">
+            <h2>Top 3 Services</h2>
+            <div class="top-services" id="topServices"></div>
+        </div>
+    </section>
+
+    <footer style="margin-top:2rem; text-align:center; font-size:0.8rem; color:var(--muted-color);">
+        Built with ❤️ using AWS Lambda, DynamoDB, S3, CloudFront, and Chart.js
+    </footer>
+
+    <script>
+        // =============================
+        // Change this to your CloudFront domain
+        // =============================
+        const CLOUD_FRONT_URL = "https://d2ksaxhe746mub.cloudfront.net";
+        const DATA_URL = `${CLOUD_FRONT_URL}/data/cost_data.json?v=${new Date().getTime()}`;
+
+
+        async function fetchData() {
+            try {
+                const response = await fetch(DATA_URL);
+                const data = await response.json();
+                updateOverview(data);
+                renderCategoryChart(data);
+                renderTrendChart(data);
+                renderTopServices(data);
+            } catch (err) { console.error("Error loading data:", err); }
+        }
+
+        function updateOverview(data) {
+            const total = data.total_spend || 0;
+            const threshold = 500;
+            document.getElementById("totalSpend").innerText = `€${total.toFixed(2)}`;
+            document.getElementById("threshold").innerText = `€${threshold}`;
+            const percent = Math.min(100, (total / threshold) * 100);
+            const progress = document.getElementById("spendProgress");
+            progress.style.width = percent + "%";
+            progress.style.backgroundColor = percent > 90 ? '#ef4444' : '#3b82f6';
+            progress.innerText = `${percent.toFixed(1)}%`;
+        }
+
+        function renderCategoryChart(data) {
+            const categories = ["Compute", "Storage", "Database", "Networking", "Other"];
+            const values = categories.map(cat => data.categories[cat] || 0);
+            const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx, { type: 'doughnut', data: { labels: categories, datasets: [{ data: values, backgroundColor: colors }] }, options: { plugins: { legend: { labels: { color: '#e2e8f0' } } } } });
+
+            const clusterDescriptions = {
+                "Compute": "EC2, Lambda, ECS/EKS, Lightsail",
+                "Storage": "S3, EBS, EFS, Glacier",
+                "Database": "RDS, DynamoDB, Redshift",
+                "Networking": "VPC, CloudFront, Route 53, ELB/ALB",
+                "Other": "Monitoring, AI/Analytics, Miscellaneous"
+            };
+
+            const clusterList = document.getElementById('clusterList');
+            clusterList.innerHTML = categories.map((cat, i) => `
+                <span style="color:${colors[i]}"><strong>${cat}</strong>: €${values[i].toFixed(2)}</span>
+                <div class="cluster-services">${clusterDescriptions[cat]}</div>
+            `).join('');
+        }
+
+        function renderTrendChart(data) {
+            const ctx = document.getElementById('trendChart').getContext('2d');
+            const trendDates = data.trend.map(item => item.date);
+            const trendValues = data.trend.map(item => item.amount);
+            const lastValue = trendValues[trendValues.length - 1] || 0;
+            const forecastValues = [];
+            for (let i = 1; i <= 7; i++) forecastValues.push(lastValue * (1 + 0.02 * i)); // simple +2% daily
+            for (let i = 1; i <= 7; i++) trendDates.push(`+${i}d`);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendDates,
+                    datasets: [
+                        { label: 'Actual Spend (€)', data: trendValues.concat(Array(7).fill(null)), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)', fill: true, tension: 0.3 },
+                        { label: 'Forecast (€)', data: Array(trendValues.length).fill(null).concat(forecastValues), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', borderDash: [5, 5], fill: true, tension: 0.3 }
+                    ]
+                },
+                options: { scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }, plugins: { legend: { labels: { color: '#e2e8f0' } } } }
+            });
+        }
+
+        function renderTopServices(data) {
+            const services = [];
+            for (const cat in data.categories) services.push({ name: cat, cost: data.categories[cat] });
+            services.sort((a, b) => b.cost - a.cost);
+            const top3 = services.slice(0, 3);
+            document.getElementById('topServices').innerHTML =
+                top3.map(s => `<span>${s.name}: €${s.cost.toFixed(2)}</span>`).join('');
+        }
+
+        fetchData();
+    </script>
+</body>
+
+</html>
