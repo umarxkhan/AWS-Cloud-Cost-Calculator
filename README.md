@@ -5,6 +5,18 @@ Built using **AWS Lambda**, **DynamoDB**, **S3**, **CloudFront**, **EventBridge*
 
 ---
 
+## Technologies Used in AWS
+
+- **S3** – Hosting the static dashboard files (HTML, JS, CSS, JSON).  
+- **CloudFront** – Content Delivery Network (CDN) to serve dashboard globally with caching.  
+- **Lambda** – Backend function to fetch and update cloud cost data.  
+- **DynamoDB** – NoSQL database to store cloud cost data.  
+- **EventBridge** – Scheduling Lambda executions automatically.  
+- **CloudWatch** – Monitoring Lambda executions, logging errors, and alerts.  
+- **IAM** – Role and policy management for least-privilege access.  
+
+---
+
 ## Features
 
 - **Real-time AWS cost tracking** via Cost Explorer API.
@@ -77,13 +89,86 @@ cloud-cost-calculator/
 - Git and GitHub account.
 - Node.js for local testing (optional).
 
+
+# AWS Cloud Cost Calculator Dashboard – Terraform Project Summary
+
+This document describes the AWS Cloud Cost Calculator Dashboard project, the Terraform infrastructure setup, AWS technologies used, and important notes for development and deployment.
+
+---
+
+## Terraform Implementation
+
+### Overview
+Terraform is used to automate the provisioning of all AWS resources for the dashboard. The project is modular to ensure maintainability and reusability.
+
+### Modules
+
+#### 1. S3 Dashboard Module
+- Creates an S3 bucket for static website hosting.
+- Configures bucket policies to block public access.
+- Enables versioning and optional server-side encryption.
+- Uploads dashboard files automatically.
+
+#### 2. CloudFront + ACM Module
+- Sets up a CloudFront distribution with the S3 bucket as origin.
+- Configures Origin Access Identity (OAI) to secure S3 content.
+- Supports SSL certificate from ACM for HTTPS.
+- Connects with Terraform outputs from the S3 module.
+
+#### 3. Lambda Module
+- Deploys a Lambda function (`fetch_costs.py`) that reads or updates cloud cost data.
+- Configured with IAM role permissions to access DynamoDB and CloudWatch.
+
+#### 4. DynamoDB Module
+- Creates a table to store cost data.
+- Configured with required primary key and read/write capacity.
+
+#### 5. EventBridge Module
+- Schedules Lambda execution at defined intervals.
+- Ensures automated updates to cost data without manual intervention.
+
+#### 6. CloudWatch + SNS Module
+- Monitors Lambda executions and sets up alarms.
+- Sends notifications to configured channels in case of failures.
+
+#### 7. CloudFront Cache Invalidation (Optional in Terraform)
+- Uses `null_resource` with `local-exec` to invalidate CloudFront cache after updates.
+- Ensures updated dashboard files are served immediately.
+
+---
+
+## Terraform Best Practices Followed
+
+- Modular structure for **S3, CloudFront, Lambda, DynamoDB, EventBridge, CloudWatch**.  
+- Outputs are shared between modules (e.g., S3 bucket name → CloudFront origin).  
+- Avoided hardcoding sensitive values; used `terraform.tfvars` and GitHub secrets.  
+- Enabled **bucket versioning** and **server-side encryption** for safety.  
+- Leveraged **cache-busting techniques** for frontend files to avoid stale content.  
+
+---
+
+## GitHub Actions CI/CD
+
+- Automatically deploys dashboard files to S3 on push to `main` branch.
+- Invalidates CloudFront cache to ensure the latest content is served.
+- Uses GitHub secrets for AWS credentials and CloudFront distribution ID.
+- Workflow steps:
+  1. Checkout repository.
+  2. Configure AWS credentials.
+  3. Sync dashboard files to S3.
+  4. Invalidate CloudFront cache.
+
+---
+
+
 ### Setup Instructions
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/<your-username>/aws-cloud-cost-calculator.git
    cd aws-cloud-cost-calculator
-````
+    ````
 
 2. **Configure Terraform variables**
    Update `terraform/terraform.tfvars`:
@@ -142,6 +227,47 @@ cloud-cost-calculator/
 * Cache-busting is enabled in the JS file to ensure CloudFront serves the latest data.
 * `cost_data.json` is generated dynamically; no need to edit manually.
 * Keep your `.tfvars` safe. Only store non-sensitive data; secrets should go into GitHub Actions Secrets.
+
+---
+
+
+## Dos
+- Use **GitHub Actions** to automate deployment to S3 and invalidate CloudFront cache.  
+- Always **version your Lambda and dashboard files**; include a timestamp or cache-busting query to avoid stale CloudFront content.  
+- Keep **Terraform modular**: separate S3, Lambda, DynamoDB, CloudFront, EventBridge, and CloudWatch into modules for reusability.  
+- Use **GitHub secrets** for AWS credentials and CloudFront distribution IDs to avoid hardcoding sensitive data.  
+- Test **Lambda locally** before deploying; use CloudWatch logs for debugging.  
+- Use **`aws s3 sync`** instead of individual uploads to ensure incremental updates are efficiently applied.  
+- Apply **progressive invalidation** on CloudFront when deploying frequently.  
+
+---
+
+## Don’ts
+- Don’t commit **Terraform state files** (`terraform.tfstate`, `.backup`) to GitHub—they contain sensitive info.  
+- Don’t hardcode AWS credentials or bucket names directly in your code.  
+- Avoid putting **large files** like Lambda packages or JSON data directly in GitHub; let Terraform or CI/CD handle it.  
+- Don’t ignore **CloudFront caching**; without invalidation or cache-busting, updated files won’t show.  
+- Don’t use overly permissive IAM policies; limit access to the specific resources your project needs.  
+
+---
+
+## Important Points to Remember
+- **Cache-busting is key**: CloudFront can serve stale files even after S3 upload; use timestamps or query strings in your URLs.  
+- **Terraform uploads static files only initially**; future updates require CI/CD (GitHub Actions) or manual sync.  
+- **Environment separation**: Keep dev/staging/prod buckets and distributions separate to prevent accidental overrides.  
+- **AWS region consistency**: S3 bucket, Lambda, DynamoDB, and CloudFront should ideally be in the same region to avoid latency.  
+- **Testing & monitoring**: Check CloudWatch logs for Lambda errors; validate dashboard updates after invalidation.  
+- **IAM scope**: Ensure GitHub Actions role has at least S3 `PutObject/ListBucket`, CloudFront `CreateInvalidation`, Lambda and DynamoDB permissions.  
+
+---
+
+## Critical Points Learned
+- **Terraform and GitHub Actions complement each other**: Terraform manages infrastructure, while GitHub Actions automates updates to content.  
+- **CloudFront cache is tricky**: Even minor changes in HTML/JS won’t reflect without invalidation or cache-busting.  
+- **Modular structure matters**: Breaking infrastructure into modules (S3, Lambda, CF, DynamoDB, EventBridge) reduces errors and simplifies management.  
+- **Secrets management is crucial**: Using GitHub secrets properly avoids exposing AWS credentials.  
+- **CI/CD enables reproducibility**: Automating deploys with GitHub Actions ensures that every commit triggers a consistent update workflow.  
+- **Monitoring costs requires careful aggregation**: Categorizing AWS services correctly and storing historical data in DynamoDB allows trend analysis and forecasting.  
 
 ---
 
