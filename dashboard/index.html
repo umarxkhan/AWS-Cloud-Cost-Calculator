@@ -133,7 +133,7 @@
 
         canvas {
             width: 100% !important;
-            height: 300px !important;
+            height: 280px !important;
         }
 
         .progress-bar {
@@ -159,13 +159,14 @@
         .top-services span {
             display: block;
             margin: 0.3rem 0;
+            font-size: 0.95rem;
         }
 
         .cluster-list {
             margin-top: 1rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #cbd5e1;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .cluster-services {
@@ -243,7 +244,6 @@
         const CLOUD_FRONT_URL = "https://d2ksaxhe746mub.cloudfront.net";
         let rawData = null;
         let categoryChart = null;
-
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
 
         function toggleTheme() {
@@ -266,19 +266,24 @@
                 const response = await fetch(DATA_URL);
                 const data = await response.json();
                 rawData = data;
+
+                // fix tiny numbers: force minimal decimal if <1
+                if (rawData.total_spend < 0.01) rawData.total_spend = 0.01;
+                for (const key in rawData.categories) {
+                    if (rawData.categories[key] < 0.01) rawData.categories[key] = 0.01;
+                }
+
                 updateOverview(data);
                 updateCategoryChart();
                 renderTrendChart(data, timeRange);
                 renderTopServices(data);
-            } catch (err) {
-                console.error("Error loading data:", err);
-            }
+            } catch (err) { console.error("Error loading data:", err); }
         }
 
         function updateOverview(data) {
             const total = data.total_spend || 0;
             const threshold = 500;
-            const change = data.change_percentage || (Math.random() * 10 - 5);
+            const change = data.change_percentage || 0;
             document.getElementById("totalSpend").innerText = `€${total.toFixed(2)}`;
             document.getElementById("threshold").innerText = `€${threshold}`;
             const percent = Math.min(100, (total / threshold) * 100);
@@ -302,10 +307,6 @@
 
             if (categoryChart) categoryChart.destroy();
 
-            const gradient = categoryCtx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(59,130,246,0.8)');
-            gradient.addColorStop(1, 'rgba(59,130,246,0.3)');
-
             categoryChart = new Chart(categoryCtx, {
                 type: 'doughnut',
                 data: { labels: categories, datasets: [{ data: values, backgroundColor: colors }] },
@@ -313,7 +314,7 @@
                     animation: { animateScale: true },
                     plugins: {
                         tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, color: getComputedStyle(document.body).getPropertyValue('--text-color'), font: { size: 12 } } }
                     }
                 }
             });
@@ -328,15 +329,20 @@
 
             const clusterList = document.getElementById('clusterList');
             clusterList.innerHTML = categories.map((cat, i) => `
-          <span style="color:${colors[i]}"><strong>${cat}</strong>: €${values[i].toFixed(2)}</span>
-          <div class="cluster-services">${clusterDescriptions[cat]}</div>
-      `).join('');
+                <span style="color:${colors[i]}"><strong>${cat}</strong>: €${values[i].toFixed(2)}</span>
+                <div class="cluster-services">${clusterDescriptions[cat]}</div>
+            `).join('');
         }
 
         function renderTrendChart(data, days) {
             const ctx = document.getElementById('trendChart').getContext('2d');
-            const trendDates = data.trend.slice(-days).map(item => item.date);
-            const trendValues = data.trend.slice(-days).map(item => item.amount);
+            const trendData = data.trend.slice(-days).map(item => ({
+                date: item.date.split('T')[0],
+                amount: Math.max(item.amount, 0.01) // prevent tiny numbers
+            }));
+
+            const trendDates = trendData.map(d => d.date);
+            const trendValues = trendData.map(d => d.amount);
             const lastValue = trendValues[trendValues.length - 1] || 0;
             const forecastValues = [];
             for (let i = 1; i <= 7; i++) forecastValues.push(lastValue * (1 + 0.02 * i));
@@ -355,20 +361,21 @@
                 data: {
                     labels: trendDates,
                     datasets: [
-                        { label: 'Actual Spend (€)', data: trendValues.concat(Array(7).fill(null)), borderColor: '#3b82f6', backgroundColor: gradientBlue, fill: true, tension: 0.3 },
-                        { label: 'Forecast (€)', data: Array(trendValues.length).fill(null).concat(forecastValues), borderColor: '#ef4444', backgroundColor: gradientRed, borderDash: [5, 5], fill: true, tension: 0.3 }
+                        { label: 'Actual Spend (€)', data: trendValues.concat(Array(7).fill(null)), borderColor: '#3b82f6', backgroundColor: gradientBlue, fill: true, tension: 0.3, pointRadius: 3 },
+                        { label: 'Forecast (€)', data: Array(trendValues.length).fill(null).concat(forecastValues), borderColor: '#ef4444', backgroundColor: gradientRed, borderDash: [5, 5], fill: true, tension: 0.3, pointRadius: 3 }
                     ]
                 },
                 options: {
                     interaction: { mode: 'index', intersect: false },
                     scales: {
-                        x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color') } },
-                        y: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color') } }
+                        x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color'), maxRotation: 0, minRotation: 0 } },
+                        y: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color'), callback: v => `€${v.toFixed(2)}` } }
                     },
                     plugins: {
                         tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
-                    }
+                        legend: { display: true, position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color'), font: { size: 12 }, boxWidth: 12, boxHeight: 12 } }
+                    },
+                    maintainAspectRatio: false
                 }
             });
         }
