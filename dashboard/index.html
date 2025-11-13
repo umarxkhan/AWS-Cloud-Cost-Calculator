@@ -15,6 +15,12 @@
             --accent-color: #3b82f6;
             --muted-color: #64748b;
             --warn-color: #ef4444;
+            /* Colors for the Doughnut Chart categories (added for CSS theme switching) */
+            --color-compute: #3b82f6;
+            --color-storage: #22c55e;
+            --color-database: #f59e0b;
+            --color-networking: #ef4444;
+            --color-other: #8b5cf6;
         }
 
         [data-theme='light'] {
@@ -24,6 +30,11 @@
             --accent-color: #2563eb;
             --muted-color: #64748b;
             --warn-color: #dc2626;
+            --color-compute: #2563eb;
+            --color-storage: #16a34a;
+            --color-database: #d97706;
+            --color-networking: #dc2626;
+            --color-other: #7c3aed;
         }
 
         body {
@@ -175,15 +186,28 @@
             margin-left: 1.2rem;
         }
 
-        /* --- Custom Legend CSS (Added) --- */
+        /* --- Custom Legend CSS --- */
         .chart-legend {
             display: flex;
             justify-content: center;
             gap: 2rem;
             margin-bottom: 0.8rem;
             font-size: 1.125rem;
-            /* Set to desired size (~18px) */
             font-weight: 600;
+        }
+
+        /* Specific layout for the category legend (more items) */
+        #categoryLegend {
+            display: flex;
+            flex-wrap: wrap;
+            /* Allows items to wrap onto the next line */
+            justify-content: space-around;
+            gap: 0.5rem 1rem;
+            /* Smaller gap for the doughnut chart */
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            /* Adjusted slightly smaller for readability with many items */
         }
 
         .legend-item {
@@ -197,16 +221,37 @@
             height: 14px;
             border-radius: 3px;
             margin-right: 0.5rem;
+            /* Ensure the box width is set */
         }
 
+        /* Trend Chart Colors */
         .legend-actual {
             background-color: var(--accent-color);
-            /* Matches the blue line */
         }
 
         .legend-forecast {
             background-color: var(--warn-color);
-            /* Matches the red line */
+        }
+
+        /* Category Chart Colors - Linked to root variables */
+        .color-compute {
+            background-color: var(--color-compute);
+        }
+
+        .color-storage {
+            background-color: var(--color-storage);
+        }
+
+        .color-database {
+            background-color: var(--color-database);
+        }
+
+        .color-networking {
+            background-color: var(--color-networking);
+        }
+
+        .color-other {
+            background-color: var(--color-other);
         }
     </style>
 </head>
@@ -255,6 +300,7 @@
                 <option value="Networking">Networking</option>
                 <option value="Other">Other</option>
             </select>
+            <div id="categoryLegend" class="chart-legend"></div>
             <canvas id="categoryChart"></canvas>
             <div id="clusterList" class="cluster-list"></div>
         </div>
@@ -286,6 +332,7 @@
 
     <script>
         const CLOUD_FRONT_URL = "https://d2ksaxhe746mub.cloudfront.net";
+        const LOCAL_DATA_FILE = "cost_data.json";
         let rawData = null;
         let categoryChart = null;
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
@@ -305,23 +352,32 @@
 
         async function fetchData() {
             const timeRange = parseInt(document.getElementById('timeRange').value);
-            const DATA_URL = `${CLOUD_FRONT_URL}/data/cost_data.json?v=${Date.now()}`;
+            let DATA_URL;
+
+            // Switch between local JSON and CloudFront based on environment
+            if (window.location.hostname === "localhost" || window.location.protocol === "file:") {
+                DATA_URL = LOCAL_DATA_FILE;
+            } else {
+                DATA_URL = `${CLOUD_FRONT_URL}/data/cost_data.json?v=${Date.now()}`;
+            }
+
             try {
                 const response = await fetch(DATA_URL);
-                const data = await response.json();
-                rawData = data;
+                rawData = await response.json();
 
-                // fix tiny numbers: force minimal decimal if <1
+                // fix tiny numbers
                 if (rawData.total_spend < 0.01) rawData.total_spend = 0.01;
                 for (const key in rawData.categories) {
                     if (rawData.categories[key] < 0.01) rawData.categories[key] = 0.01;
                 }
 
-                updateOverview(data);
+                updateOverview(rawData);
                 updateCategoryChart();
-                renderTrendChart(data, timeRange);
-                renderTopServices(data);
-            } catch (err) { console.error("Error loading data:", err); }
+                renderTrendChart(rawData, timeRange);
+                renderTopServices(rawData);
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
         }
 
         function updateOverview(data) {
@@ -347,7 +403,18 @@
             const categories = ["Compute", "Storage", "Database", "Networking", "Other"];
             const values = categories.map(cat => filter === 'all' ? rawData.categories[cat] || 0 :
                 (cat === filter ? rawData.categories[cat] || 0 : 0));
+            // Ensure colors are kept in sync with CSS classes for the custom legend
             const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
+            const colorClasses = ['color-compute', 'color-storage', 'color-database', 'color-networking', 'color-other'];
+
+            // --- Custom Legend Generation (Doughnut Chart) ---
+            const categoryLegend = document.getElementById('categoryLegend');
+            categoryLegend.innerHTML = categories.map((cat, i) => `
+                <div class="legend-item">
+                    <span class="legend-color ${colorClasses[i]}"></span>
+                    ${cat}
+                </div>
+            `).join('');
 
             if (categoryChart) categoryChart.destroy();
 
@@ -358,7 +425,8 @@
                     animation: { animateScale: true },
                     plugins: {
                         tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, boxHeight: 12, color: getComputedStyle(document.body).getPropertyValue('--text-color'), font: { size: 12 } } }
+                        // FIX: Disabled the default Chart.js legend
+                        legend: { display: false }
                     }
                 }
             });
@@ -388,7 +456,7 @@
 
             const trendData = data.trend.slice(-days).map(item => ({
                 date: item.date.split('T')[0],
-                amount: Math.max(item.amount, 0.01) // prevent tiny numbers
+                amount: Math.max(item.amount, 0.01)
             }));
 
             const trendDates = trendData.map(d => d.date);
