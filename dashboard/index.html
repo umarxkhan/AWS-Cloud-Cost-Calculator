@@ -115,6 +115,7 @@
 
         .stats {
             display: flex;
+            /* Ensures side-by-side layout */
             justify-content: space-between;
             flex-wrap: wrap;
         }
@@ -124,6 +125,7 @@
             border-radius: 8px;
             padding: 1rem;
             width: 48%;
+            /* Ensures two fit per line */
             text-align: center;
             margin-top: 0.5rem;
         }
@@ -186,7 +188,7 @@
             margin-left: 1.2rem;
         }
 
-        /* --- Custom Legend CSS --- */
+        /* --- Custom Legend CSS (Applied to both charts) --- */
         .chart-legend {
             display: flex;
             justify-content: center;
@@ -501,7 +503,7 @@
                                 }
                             },
                             grid: {
-                                // NEW: Custom vertical line for forecast separation
+                                // Custom vertical line for forecast separation
                                 color: (context) => {
                                     if (context.index === forecastStart - 1) {
                                         return 'rgba(255, 255, 255, 0.4)'; // Brighter line at the pivot point
@@ -514,17 +516,17 @@
                             }
                         },
                         y: {
-                            // NEW: Ensure Y-axis starts at 0
+                            // Ensure Y-axis starts at 0
                             min: 0,
                             ticks: {
                                 color: getComputedStyle(document.body).getPropertyValue('--muted-color'),
-                                // FIX: Reduced font size and added padding for better visual alignment
+                                // Reduced font size and added padding for better visual alignment
                                 font: {
                                     size: 10
                                 },
                                 padding: 5,
                                 callback: function (value) {
-                                    // NEW: Abbreviated currency formatting
+                                    // Abbreviated currency formatting
                                     if (value >= 1000000) {
                                         return '€' + (value / 1000000).toFixed(1) + 'M';
                                     }
@@ -534,7 +536,7 @@
                                     return '€' + value.toFixed(2);
                                 }
                             },
-                            // NEW: Make horizontal grid lines very subtle
+                            // Make horizontal grid lines very subtle
                             grid: {
                                 color: 'rgba(100, 116, 139, 0.15)',
                             }
