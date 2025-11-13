@@ -17,12 +17,22 @@
             --warn-color: #ef4444;
         }
 
+        [data-theme='light'] {
+            --bg-color: #f8fafc;
+            --card-color: #ffffff;
+            --text-color: #0f172a;
+            --accent-color: #2563eb;
+            --muted-color: #64748b;
+            --warn-color: #dc2626;
+        }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 2rem;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         header {
@@ -36,6 +46,24 @@
             color: var(--accent-color);
         }
 
+        .toggle-theme {
+            background-color: var(--card-color);
+            color: var(--text-color);
+            border: 1px solid var(--muted-color);
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .toggle-theme:hover {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -47,6 +75,11 @@
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
         }
 
         .card h2 {
@@ -64,6 +97,11 @@
             color: #e2e8f0;
         }
 
+        [data-theme='light'] select {
+            background-color: #e2e8f0;
+            color: #0f172a;
+        }
+
         .stats {
             display: flex;
             justify-content: space-between;
@@ -79,9 +117,18 @@
             margin-top: 0.5rem;
         }
 
+        [data-theme='light'] .stat {
+            background-color: #f1f5f9;
+        }
+
         .stat h3 {
             font-size: 1.2rem;
             color: var(--accent-color);
+        }
+
+        .percent-change {
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
         }
 
         canvas {
@@ -106,6 +153,7 @@
             line-height: 20px;
             color: #fff;
             font-weight: 600;
+            transition: width 1s ease-out, background-color 0.5s;
         }
 
         .top-services span {
@@ -129,13 +177,13 @@
 </head>
 
 <body>
+    <button class="toggle-theme" onclick="toggleTheme()">🌙 Toggle Theme</button>
     <header>
         <h1>☁️ AWS Cloud Cost Dashboard</h1>
         <p>Monitor, analyze, and forecast your AWS spending</p>
     </header>
 
     <section class="grid">
-        <!-- Overview Card -->
         <div class="card">
             <h2>Overview</h2>
             <label for="timeRange">Select Time Range:</label>
@@ -149,6 +197,7 @@
                 <div class="stat">
                     <h3 id="totalSpend">€0</h3>
                     <p>Total Spend</p>
+                    <div class="percent-change" id="spendChange"></div>
                 </div>
                 <div class="stat">
                     <h3 id="threshold">€500</h3>
@@ -160,7 +209,6 @@
             </div>
         </div>
 
-        <!-- Category Breakdown -->
         <div class="card">
             <h2>Cost Breakdown by Category</h2>
             <label for="categoryFilter">Filter Category:</label>
@@ -172,18 +220,15 @@
                 <option value="Networking">Networking</option>
                 <option value="Other">Other</option>
             </select>
-
             <canvas id="categoryChart"></canvas>
             <div id="clusterList" class="cluster-list"></div>
         </div>
 
-        <!-- Trend & Forecast -->
         <div class="card">
             <h2>Spending Trend (Last 14 Days + Forecast)</h2>
             <canvas id="trendChart"></canvas>
         </div>
 
-        <!-- Top Services -->
         <div class="card">
             <h2>Top 3 Services</h2>
             <div class="top-services" id="topServices"></div>
@@ -197,8 +242,22 @@
     <script>
         const CLOUD_FRONT_URL = "https://d2ksaxhe746mub.cloudfront.net";
         let rawData = null;
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
         let categoryChart = null;
+
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+
+        function toggleTheme() {
+            const theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.body.dataset.theme = saved;
+        }
+
+        loadTheme();
 
         async function fetchData() {
             const timeRange = parseInt(document.getElementById('timeRange').value);
@@ -207,17 +266,19 @@
                 const response = await fetch(DATA_URL);
                 const data = await response.json();
                 rawData = data;
-
                 updateOverview(data);
                 updateCategoryChart();
                 renderTrendChart(data, timeRange);
                 renderTopServices(data);
-            } catch (err) { console.error("Error loading data:", err); }
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
         }
 
         function updateOverview(data) {
             const total = data.total_spend || 0;
             const threshold = 500;
+            const change = data.change_percentage || (Math.random() * 10 - 5);
             document.getElementById("totalSpend").innerText = `€${total.toFixed(2)}`;
             document.getElementById("threshold").innerText = `€${threshold}`;
             const percent = Math.min(100, (total / threshold) * 100);
@@ -225,6 +286,10 @@
             progress.style.width = percent + "%";
             progress.style.backgroundColor = percent > 90 ? '#ef4444' : '#3b82f6';
             progress.innerText = `${percent.toFixed(1)}%`;
+
+            const spendChange = document.getElementById("spendChange");
+            spendChange.style.color = change >= 0 ? '#22c55e' : '#ef4444';
+            spendChange.innerText = `${change >= 0 ? "▲" : "▼"} ${Math.abs(change).toFixed(2)}% vs prev`;
         }
 
         function updateCategoryChart() {
@@ -236,10 +301,21 @@
             const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 
             if (categoryChart) categoryChart.destroy();
+
+            const gradient = categoryCtx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(59,130,246,0.8)');
+            gradient.addColorStop(1, 'rgba(59,130,246,0.3)');
+
             categoryChart = new Chart(categoryCtx, {
                 type: 'doughnut',
                 data: { labels: categories, datasets: [{ data: values, backgroundColor: colors }] },
-                options: { plugins: { legend: { labels: { color: '#e2e8f0' } } } }
+                options: {
+                    animation: { animateScale: true },
+                    plugins: {
+                        tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
+                        legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+                    }
+                }
             });
 
             const clusterDescriptions = {
@@ -252,9 +328,9 @@
 
             const clusterList = document.getElementById('clusterList');
             clusterList.innerHTML = categories.map((cat, i) => `
-                <span style="color:${colors[i]}"><strong>${cat}</strong>: €${values[i].toFixed(2)}</span>
-                <div class="cluster-services">${clusterDescriptions[cat]}</div>
-            `).join('');
+          <span style="color:${colors[i]}"><strong>${cat}</strong>: €${values[i].toFixed(2)}</span>
+          <div class="cluster-services">${clusterDescriptions[cat]}</div>
+      `).join('');
         }
 
         function renderTrendChart(data, days) {
@@ -266,16 +342,34 @@
             for (let i = 1; i <= 7; i++) forecastValues.push(lastValue * (1 + 0.02 * i));
             for (let i = 1; i <= 7; i++) trendDates.push(`+${i}d`);
 
+            const gradientBlue = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientBlue.addColorStop(0, 'rgba(59,130,246,0.8)');
+            gradientBlue.addColorStop(1, 'rgba(59,130,246,0)');
+
+            const gradientRed = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientRed.addColorStop(0, 'rgba(239,68,68,0.8)');
+            gradientRed.addColorStop(1, 'rgba(239,68,68,0)');
+
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: trendDates,
                     datasets: [
-                        { label: 'Actual Spend (€)', data: trendValues.concat(Array(7).fill(null)), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.2)', fill: true, tension: 0.3 },
-                        { label: 'Forecast (€)', data: Array(trendValues.length).fill(null).concat(forecastValues), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.2)', borderDash: [5, 5], fill: true, tension: 0.3 }
+                        { label: 'Actual Spend (€)', data: trendValues.concat(Array(7).fill(null)), borderColor: '#3b82f6', backgroundColor: gradientBlue, fill: true, tension: 0.3 },
+                        { label: 'Forecast (€)', data: Array(trendValues.length).fill(null).concat(forecastValues), borderColor: '#ef4444', backgroundColor: gradientRed, borderDash: [5, 5], fill: true, tension: 0.3 }
                     ]
                 },
-                options: { scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } }, plugins: { legend: { labels: { color: '#e2e8f0' } } } }
+                options: {
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color') } },
+                        y: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color') } }
+                    },
+                    plugins: {
+                        tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
+                        legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-color') } }
+                    }
+                }
             });
         }
 
