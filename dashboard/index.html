@@ -15,7 +15,7 @@
             --accent-color: #3b82f6;
             --muted-color: #64748b;
             --warn-color: #ef4444;
-            /* Colors for the Doughnut Chart categories (added for CSS theme switching) */
+            /* Colors for the Doughnut Chart categories */
             --color-compute: #3b82f6;
             --color-storage: #22c55e;
             --color-database: #f59e0b;
@@ -200,14 +200,11 @@
         #categoryLegend {
             display: flex;
             flex-wrap: wrap;
-            /* Allows items to wrap onto the next line */
             justify-content: space-around;
             gap: 0.5rem 1rem;
-            /* Smaller gap for the doughnut chart */
             margin-top: 0.5rem;
             margin-bottom: 0.5rem;
             font-size: 1rem;
-            /* Adjusted slightly smaller for readability with many items */
         }
 
         .legend-item {
@@ -221,7 +218,6 @@
             height: 14px;
             border-radius: 3px;
             margin-right: 0.5rem;
-            /* Ensure the box width is set */
         }
 
         /* Trend Chart Colors */
@@ -403,7 +399,6 @@
             const categories = ["Compute", "Storage", "Database", "Networking", "Other"];
             const values = categories.map(cat => filter === 'all' ? rawData.categories[cat] || 0 :
                 (cat === filter ? rawData.categories[cat] || 0 : 0));
-            // Ensure colors are kept in sync with CSS classes for the custom legend
             const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
             const colorClasses = ['color-compute', 'color-storage', 'color-database', 'color-networking', 'color-other'];
 
@@ -466,6 +461,9 @@
             for (let i = 1; i <= 7; i++) forecastValues.push(lastValue * (1 + 0.02 * i));
             for (let i = 1; i <= 7; i++) trendDates.push(`+${i}d`);
 
+            // Index where the forecast begins (length of actual data)
+            const forecastStart = trendValues.length;
+
             const gradientBlue = ctx.createLinearGradient(0, 0, 0, 300);
             gradientBlue.addColorStop(0, 'rgba(59,130,246,0.8)');
             gradientBlue.addColorStop(1, 'rgba(59,130,246,0)');
@@ -484,14 +482,65 @@
                     ]
                 },
                 options: {
-                    interaction: { mode: 'index', intersect: false },
+                    interaction: { mode: 'nearest', intersect: false, axis: 'x' },
                     scales: {
-                        x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color'), maxRotation: 0, minRotation: 0 } },
-                        y: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--muted-color'), callback: v => `€${v.toFixed(2)}` } }
+                        x: {
+                            ticks: {
+                                color: getComputedStyle(document.body).getPropertyValue('--muted-color'),
+                                maxRotation: 45,
+                                minRotation: 45,
+                                callback: function (value, index, values) {
+                                    const label = this.getLabelForValue(value);
+                                    if (label.includes('+')) {
+                                        return label;
+                                    }
+                                    const parts = label.split('-');
+                                    // Format YYYY-MM-DD to MM/DD
+                                    return parts.length === 3 ? `${parts[1]}/${parts[2]}` : label;
+                                }
+                            },
+                            grid: {
+                                // NEW: Custom vertical line for forecast separation
+                                color: (context) => {
+                                    if (context.index === forecastStart - 1) {
+                                        return 'rgba(255, 255, 255, 0.4)'; // Brighter line at the pivot point
+                                    }
+                                    return 'rgba(100, 116, 139, 0.15)'; // Lighter grid lines
+                                },
+                                lineWidth: (context) => {
+                                    return context.index === forecastStart - 1 ? 2 : 1;
+                                }
+                            }
+                        },
+                        y: {
+                            // NEW: Ensure Y-axis starts at 0
+                            min: 0,
+                            ticks: {
+                                color: getComputedStyle(document.body).getPropertyValue('--muted-color'),
+                                // FIX: Reduced font size and added padding for better visual alignment
+                                font: {
+                                    size: 10
+                                },
+                                padding: 5,
+                                callback: function (value) {
+                                    // NEW: Abbreviated currency formatting
+                                    if (value >= 1000000) {
+                                        return '€' + (value / 1000000).toFixed(1) + 'M';
+                                    }
+                                    if (value >= 1000) {
+                                        return '€' + (value / 1000).toFixed(1) + 'K';
+                                    }
+                                    return '€' + value.toFixed(2);
+                                }
+                            },
+                            // NEW: Make horizontal grid lines very subtle
+                            grid: {
+                                color: 'rgba(100, 116, 139, 0.15)',
+                            }
+                        }
                     },
                     plugins: {
                         tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        // FIX: Disabled the default chart.js legend to use custom HTML legend
                         legend: { display: false }
                     },
                     maintainAspectRatio: false
