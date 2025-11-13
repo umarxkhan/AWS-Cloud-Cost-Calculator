@@ -1,4 +1,3 @@
-```markdown
 # AWS Cloud Cost Calculator
 
 A dynamic dashboard to monitor, analyze, and forecast your AWS spending by category.  
@@ -68,8 +67,6 @@ cloud-cost-calculator/
 └── deploy.yml           # CI/CD workflow for Terraform deployment
 
 ````
-
----
 
 ## Getting Started
 
