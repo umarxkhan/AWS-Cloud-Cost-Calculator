@@ -90,12 +90,6 @@ cloud-cost-calculator/
 - Node.js for local testing (optional).
 
 
-# AWS Cloud Cost Calculator Dashboard – Terraform Project Summary
-
-This document describes the AWS Cloud Cost Calculator Dashboard project, the Terraform infrastructure setup, AWS technologies used, and important notes for development and deployment.
-
----
-
 ## Terraform Implementation
 
 ### Overview
@@ -226,7 +220,6 @@ Terraform is used to automate the provisioning of all AWS resources for the dash
 
 * Cache-busting is enabled in the JS file to ensure CloudFront serves the latest data.
 * `cost_data.json` is generated dynamically; no need to edit manually.
-* Keep your `.tfvars` safe. Only store non-sensitive data; secrets should go into GitHub Actions Secrets.
 
 ---
 
@@ -248,7 +241,7 @@ Terraform is used to automate the provisioning of all AWS resources for the dash
 - Avoid putting **large files** like Lambda packages or JSON data directly in GitHub; let Terraform or CI/CD handle it.  
 - Don’t ignore **CloudFront caching**; without invalidation or cache-busting, updated files won’t show.  
 - Don’t use overly permissive IAM policies; limit access to the specific resources your project needs.  
-
+- Keep your `.tfvars` safe. Only store non-sensitive data; secrets should go into GitHub Actions Secrets.
 ---
 
 ## Important Points to Remember
@@ -258,6 +251,7 @@ Terraform is used to automate the provisioning of all AWS resources for the dash
 - **AWS region consistency**: S3 bucket, Lambda, DynamoDB, and CloudFront should ideally be in the same region to avoid latency.  
 - **Testing & monitoring**: Check CloudWatch logs for Lambda errors; validate dashboard updates after invalidation.  
 - **IAM scope**: Ensure GitHub Actions role has at least S3 `PutObject/ListBucket`, CloudFront `CreateInvalidation`, Lambda and DynamoDB permissions.  
+- **OAC instead of OAI** Use CloudFront Origin Access Control (OAC) instead of the older Origin Access Identity (OAI) for secure, modern access to private S3 buckets.
 
 ---
 
