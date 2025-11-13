@@ -252,7 +252,7 @@
     </style>
 </head>
 
-<body>
+<body data-theme="light">
     <button class="toggle-theme" onclick="toggleTheme()">🌙 Toggle Theme</button>
     <header>
         <h1>☁️ AWS Cloud Cost Dashboard</h1>
@@ -340,7 +340,8 @@
         }
 
         function loadTheme() {
-            const saved = localStorage.getItem('theme') || 'dark';
+            // FIX: Changed default theme from 'dark' to 'light'
+            const saved = localStorage.getItem('theme') || 'light';
             document.body.dataset.theme = saved;
         }
 
@@ -420,7 +421,7 @@
                     animation: { animateScale: true },
                     plugins: {
                         tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        // FIX: Disabled the default Chart.js legend
+                        // Disabled the default Chart.js legend
                         legend: { display: false }
                     }
                 }
