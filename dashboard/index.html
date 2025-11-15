@@ -2,565 +2,932 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cloud Cost Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Cost Calculator - AWS Spending Dashboard</title>
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-color: #1e293b;
-            --text-color: #e2e8f0;
-            --accent-color: #3b82f6;
-            --muted-color: #64748b;
-            --warn-color: #ef4444;
-            /* Colors for the Doughnut Chart categories */
-            --color-compute: #3b82f6;
-            --color-storage: #22c55e;
-            --color-database: #f59e0b;
-            --color-networking: #ef4444;
-            --color-other: #8b5cf6;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        [data-theme='light'] {
-            --bg-color: #f8fafc;
-            --card-color: #ffffff;
-            --text-color: #0f172a;
-            --accent-color: #2563eb;
-            --muted-color: #64748b;
-            --warn-color: #dc2626;
-            --color-compute: #2563eb;
-            --color-storage: #16a34a;
-            --color-database: #d97706;
-            --color-networking: #dc2626;
-            --color-other: #7c3aed;
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
             font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 2rem;
-            transition: background-color 0.3s, color 0.3s;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            background-image:
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        header h1 {
-            font-size: 2rem;
-            font-weight: 600;
-            color: var(--accent-color);
-        }
-
-        .toggle-theme {
-            background-color: var(--card-color);
-            color: var(--text-color);
-            border: 1px solid var(--muted-color);
-            padding: 0.4rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-theme:hover {
-            background-color: var(--accent-color);
-            color: #fff;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .card {
-            background-color: var(--card-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-        }
-
-        .card h2 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: var(--accent-color);
-        }
-
-        select {
-            margin-bottom: 1rem;
-            padding: 0.3rem 0.5rem;
-            border-radius: 6px;
-            border: none;
-            background-color: #334155;
-            color: #e2e8f0;
-        }
-
-        [data-theme='light'] select {
-            background-color: #e2e8f0;
-            color: #0f172a;
-        }
-
-        .stats {
+        /* Header */
+        .header {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px 40px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: flex;
-            /* Ensures side-by-side layout */
             justify-content: space-between;
+            align-items: center;
             flex-wrap: wrap;
         }
 
-        .stat {
-            background-color: #334155;
-            border-radius: 8px;
-            padding: 1rem;
-            width: 48%;
-            /* Ensures two fit per line */
-            text-align: center;
-            margin-top: 0.5rem;
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
-        [data-theme='light'] .stat {
-            background-color: #f1f5f9;
-        }
-
-        .stat h3 {
-            font-size: 1.2rem;
-            color: var(--accent-color);
-        }
-
-        .percent-change {
+        .header .last-updated {
+            color: var(--text-secondary);
             font-size: 0.9rem;
-            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        canvas {
-            width: 100% !important;
-            height: 280px !important;
+        /* Alert Banner */
+        .alert {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 30px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: slideDown 0.3s ease-out;
         }
 
-        .progress-bar {
-            height: 20px;
-            background-color: #334155;
-            border-radius: 10px;
-            margin-top: 0.5rem;
+        .alert.show {
+            display: flex;
+        }
+
+        .alert i {
+            font-size: 1.5rem;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
             overflow: hidden;
         }
 
-        .progress {
-            height: 100%;
-            background-color: var(--accent-color);
-            width: 0%;
-            text-align: right;
-            padding-right: 5px;
-            line-height: 20px;
-            color: #fff;
-            font-weight: 600;
-            transition: width 1s ease-out, background-color 0.5s;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-1);
         }
 
-        .top-services span {
-            display: block;
-            margin: 0.3rem 0;
-            font-size: 0.95rem;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .cluster-list {
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            color: #cbd5e1;
-            line-height: 1.4;
+        .stat-card.compute::before {
+            background: var(--gradient-1);
         }
 
-        .cluster-services {
-            font-size: 0.8rem;
-            color: var(--muted-color);
-            margin-left: 1.2rem;
+        .stat-card.storage::before {
+            background: var(--gradient-2);
         }
 
-        /* --- Custom Legend CSS (Applied to both charts) --- */
-        .chart-legend {
+        .stat-card.database::before {
+            background: var(--gradient-3);
+        }
+
+        .stat-card.networking::before {
+            background: var(--gradient-4);
+        }
+
+        .stat-card.other::before {
+            background: var(--gradient-5);
+        }
+
+        .stat-header {
             display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 0.8rem;
-            font-size: 1.125rem;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
             font-weight: 600;
         }
 
-        /* Specific layout for the category legend (more items) */
-        #categoryLegend {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            gap: 0.5rem 1rem;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-
-        .legend-item {
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
-            color: var(--text-color);
+            justify-content: center;
+            font-size: 1.2rem;
         }
 
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-            margin-right: 0.5rem;
+        .stat-card.compute .stat-icon {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
         }
 
-        /* Trend Chart Colors */
-        .legend-actual {
-            background-color: var(--accent-color);
+        .stat-card.storage .stat-icon {
+            background: rgba(245, 87, 108, 0.2);
+            color: #f5576c;
         }
 
-        .legend-forecast {
-            background-color: var(--warn-color);
+        .stat-card.database .stat-icon {
+            background: rgba(79, 172, 254, 0.2);
+            color: #4facfe;
         }
 
-        /* Category Chart Colors - Linked to root variables */
-        .color-compute {
-            background-color: var(--color-compute);
+        .stat-card.networking .stat-icon {
+            background: rgba(67, 233, 123, 0.2);
+            color: #43e97b;
         }
 
-        .color-storage {
-            background-color: var(--color-storage);
+        .stat-card.other .stat-icon {
+            background: rgba(250, 112, 154, 0.2);
+            color: #fa709a;
         }
 
-        .color-database {
-            background-color: var(--color-database);
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
 
-        .color-networking {
-            background-color: var(--color-networking);
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .color-other {
-            background-color: var(--color-other);
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        /* Total Spend Card */
+        .total-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .total-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .total-card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .total-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+        }
+
+        .total-amount {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .total-period {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* Comparison Section */
+        .comparison-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .comparison-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .comparison-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .comparison-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .comparison-diff {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .total-amount {
+                font-size: 2.5rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+            z-index: 1000;
+            margin-bottom: 5px;
         }
     </style>
 </head>
 
-<body data-theme="light">
-    <button class="toggle-theme" onclick="toggleTheme()">🌙 Toggle Theme</button>
-    <header>
-        <h1>☁️ AWS Cloud Cost Dashboard</h1>
-        <p>Monitor, analyze, and forecast your AWS spending</p>
-    </header>
-
-    <section class="grid">
-        <div class="card">
-            <h2>Overview</h2>
-            <label for="timeRange">Select Time Range:</label>
-            <select id="timeRange" onchange="fetchData()">
-                <option value="7">Last 7 Days</option>
-                <option value="14" selected>Last 14 Days</option>
-                <option value="30">Last 30 Days</option>
-            </select>
-
-            <div class="stats">
-                <div class="stat">
-                    <h3 id="totalSpend">€0</h3>
-                    <p>Total Spend</p>
-                    <div class="percent-change" id="spendChange"></div>
-                </div>
-                <div class="stat">
-                    <h3 id="threshold">€500</h3>
-                    <p>Budget Threshold</p>
-                </div>
-            </div>
-            <div class="progress-bar">
-                <div id="spendProgress" class="progress">0%</div>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <i class="fas fa-cloud"></i>
+                Cloud Cost Calculator
+            </h1>
+            <div class="last-updated">
+                <i class="fas fa-clock"></i>
+                <span id="lastUpdated">Loading...</span>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Cost Breakdown by Category</h2>
-            <label for="categoryFilter">Filter Category:</label>
-            <select id="categoryFilter" onchange="updateCategoryChart()">
-                <option value="all" selected>All</option>
-                <option value="Compute">Compute</option>
-                <option value="Storage">Storage</option>
-                <option value="Database">Database</option>
-                <option value="Networking">Networking</option>
-                <option value="Other">Other</option>
-            </select>
-            <div id="categoryLegend" class="chart-legend"></div>
-            <canvas id="categoryChart"></canvas>
-            <div id="clusterList" class="cluster-list"></div>
+        <!-- Alert Banner -->
+        <div class="alert" id="alertBanner">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Budget Alert!</strong>
+                <span id="alertMessage">Your spending has exceeded the threshold.</span>
+            </div>
         </div>
 
-        <div class="card">
-            <h2>Spending Trend (Last 14 Days + Forecast)</h2>
-            <div id="trendLegend" class="chart-legend">
-                <div class="legend-item">
-                    <span class="legend-color legend-actual"></span>
-                    Actual Spend (€)
+        <!-- Total Spend Card -->
+        <div class="total-card">
+            <div class="total-card-content">
+                <div class="total-label">Total AWS Spending</div>
+                <div class="total-amount" id="totalAmount">€0.00</div>
+                <div class="total-period" id="totalPeriod">Current Month</div>
+            </div>
+        </div>
+
+        <!-- Category Stats -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be populated by JavaScript -->
+        </div>
+
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Cost Distribution
+                    </div>
                 </div>
-                <div class="legend-item">
-                    <span class="legend-color legend-forecast"></span>
-                    Forecast (€)
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
                 </div>
             </div>
-            <canvas id="trendChart"></canvas>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fas fa-chart-line"></i>
+                        Spending Trends
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
         </div>
 
-        <div class="card">
-            <h2>Top 3 Services</h2>
-            <div class="top-services" id="topServices"></div>
+        <!-- Comparison Section -->
+        <div class="comparison-section">
+            <div class="chart-header">
+                <div class="chart-title">
+                    <i class="fas fa-balance-scale"></i>
+                    Weekly & Daily Comparison
+                </div>
+            </div>
+            <div class="comparison-grid" id="comparisonGrid">
+                <!-- Comparison data will be populated by JavaScript -->
+            </div>
         </div>
-    </section>
 
-    <footer style="margin-top:2rem; text-align:center; font-size:0.8rem; color:var(--muted-color);">
-        Built with ❤️ using AWS Lambda, DynamoDB, S3, CloudFront, and Chart.js
-    </footer>
+        <!-- Historical Trend Chart -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">
+                    <i class="fas fa-chart-area"></i>
+                    Historical Cost Analysis
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
 
     <script>
-        const CLOUD_FRONT_URL = "https://d2ksaxhe746mub.cloudfront.net";
-        const LOCAL_DATA_FILE = "cost_data.json";
-        let rawData = null;
-        let categoryChart = null;
-        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+        // Chart instances
+        let pieChart, lineChart, barChart;
 
-        function toggleTheme() {
-            const theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
-            document.body.dataset.theme = theme;
-            localStorage.setItem('theme', theme);
-        }
-
-        function loadTheme() {
-            // FIX: Changed default theme from 'dark' to 'light'
-            const saved = localStorage.getItem('theme') || 'light';
-            document.body.dataset.theme = saved;
-        }
-
-        loadTheme();
-
-        async function fetchData() {
-            const timeRange = parseInt(document.getElementById('timeRange').value);
-            let DATA_URL;
-
-            // Switch between local JSON and CloudFront based on environment
-            if (window.location.hostname === "localhost" || window.location.protocol === "file:") {
-                DATA_URL = LOCAL_DATA_FILE;
-            } else {
-                DATA_URL = `${CLOUD_FRONT_URL}/data/cost_data.json?v=${Date.now()}`;
+        // Category configuration
+        const categories = {
+            compute: {
+                name: 'Compute',
+                icon: 'fa-server',
+                color: '#667eea',
+                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            },
+            storage: {
+                name: 'Storage',
+                icon: 'fa-database',
+                color: '#f5576c',
+                gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+            },
+            database: {
+                name: 'Database',
+                icon: 'fa-table',
+                color: '#4facfe',
+                gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+            },
+            networking: {
+                name: 'Networking',
+                icon: 'fa-network-wired',
+                color: '#43e97b',
+                gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+            },
+            other: {
+                name: 'Other',
+                icon: 'fa-cube',
+                color: '#fa709a',
+                gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
             }
+        };
 
+        // Load cost data
+        async function loadCostData() {
             try {
-                const response = await fetch(DATA_URL);
-                rawData = await response.json();
-
-                // fix tiny numbers
-                if (rawData.total_spend < 0.01) rawData.total_spend = 0.01;
-                for (const key in rawData.categories) {
-                    if (rawData.categories[key] < 0.01) rawData.categories[key] = 0.01;
+                const response = await fetch('data/cost_data.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load cost data');
                 }
-
-                updateOverview(rawData);
-                updateCategoryChart();
-                renderTrendChart(rawData, timeRange);
-                renderTopServices(rawData);
-            } catch (err) {
-                console.error("Error loading data:", err);
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                console.error('Error loading cost data:', error);
+                // Use sample data if file not found
+                renderDashboard(getSampleData());
             }
         }
 
-        function updateOverview(data) {
-            const total = data.total_spend || 0;
-            const threshold = 500;
-            const change = data.change_percentage || 0;
-            document.getElementById("totalSpend").innerText = `€${total.toFixed(2)}`;
-            document.getElementById("threshold").innerText = `€${threshold}`;
-            const percent = Math.min(100, (total / threshold) * 100);
-            const progress = document.getElementById("spendProgress");
-            progress.style.width = percent + "%";
-            progress.style.backgroundColor = percent > 90 ? '#ef4444' : '#3b82f6';
-            progress.innerText = `${percent.toFixed(1)}%`;
-
-            const spendChange = document.getElementById("spendChange");
-            spendChange.style.color = change >= 0 ? '#22c55e' : '#ef4444';
-            spendChange.innerText = `${change >= 0 ? "▲" : "▼"} ${Math.abs(change).toFixed(2)}% vs prev`;
-        }
-
-        function updateCategoryChart() {
-            if (!rawData) return;
-            const filter = document.getElementById('categoryFilter').value;
-            const categories = ["Compute", "Storage", "Database", "Networking", "Other"];
-            const values = categories.map(cat => filter === 'all' ? rawData.categories[cat] || 0 :
-                (cat === filter ? rawData.categories[cat] || 0 : 0));
-            const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
-            const colorClasses = ['color-compute', 'color-storage', 'color-database', 'color-networking', 'color-other'];
-
-            // --- Custom Legend Generation (Doughnut Chart) ---
-            const categoryLegend = document.getElementById('categoryLegend');
-            categoryLegend.innerHTML = categories.map((cat, i) => `
-                <div class="legend-item">
-                    <span class="legend-color ${colorClasses[i]}"></span>
-                    ${cat}
-                </div>
-            `).join('');
-
-            if (categoryChart) categoryChart.destroy();
-
-            categoryChart = new Chart(categoryCtx, {
-                type: 'doughnut',
-                data: { labels: categories, datasets: [{ data: values, backgroundColor: colors }] },
-                options: {
-                    animation: { animateScale: true },
-                    plugins: {
-                        tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        // Disabled the default Chart.js legend
-                        legend: { display: false }
-                    }
+        // Sample data for demonstration
+        function getSampleData() {
+            return {
+                total: 485.75,
+                period: 'Current Month',
+                lastUpdated: new Date().toLocaleString(),
+                categories: {
+                    compute: { current: 185.50, previous: 165.20, change: 12.3 },
+                    storage: { current: 95.25, previous: 88.10, change: 8.1 },
+                    database: { current: 120.00, previous: 115.50, change: 3.9 },
+                    networking: { current: 65.00, previous: 70.20, change: -7.4 },
+                    other: { current: 20.00, previous: 18.50, change: 8.1 }
+                },
+                trends: {
+                    daily: [45.2, 48.5, 42.1, 50.3, 47.8, 52.1, 49.5],
+                    weekly: [320.5, 345.2, 365.8, 385.4, 410.2, 435.6, 485.75],
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7']
+                },
+                comparison: {
+                    today: 52.1,
+                    yesterday: 49.5,
+                    thisWeek: 485.75,
+                    lastWeek: 435.6,
+                    thisMonth: 485.75,
+                    lastMonth: 420.3
+                },
+                alert: {
+                    active: false,
+                    message: ''
                 }
-            });
-
-            const clusterDescriptions = {
-                "Compute": "EC2, Lambda, ECS/EKS, Lightsail",
-                "Storage": "S3, EBS, EFS, Glacier",
-                "Database": "RDS, DynamoDB, Redshift",
-                "Networking": "VPC, CloudFront, Route 53, ELB/ALB",
-                "Other": "Monitoring, AI/Analytics, Miscellaneous"
             };
-
-            const clusterList = document.getElementById('clusterList');
-            clusterList.innerHTML = categories.map((cat, i) => `
-                <span style="color:${colors[i]}"><strong>${cat}</strong>: €${values[i].toFixed(2)}</span>
-                <div class="cluster-services">${clusterDescriptions[cat]}</div>
-            `).join('');
         }
 
-        function renderTrendChart(data, days) {
-            const ctx = document.getElementById('trendChart').getContext('2d');
+        // Render the dashboard
+        function renderDashboard(data) {
+            // Update header
+            document.getElementById('lastUpdated').textContent =
+                data.lastUpdated || new Date().toLocaleString();
 
-            // Destroy existing chart instance to prevent duplicates/errors
-            if (window.trendChartInstance) {
-                window.trendChartInstance.destroy();
+            // Update total
+            document.getElementById('totalAmount').textContent =
+                `€${data.total.toFixed(2)}`;
+            document.getElementById('totalPeriod').textContent = data.period || 'Current Month';
+
+            // Show alert if active
+            if (data.alert && data.alert.active) {
+                const alertBanner = document.getElementById('alertBanner');
+                document.getElementById('alertMessage').textContent = data.alert.message;
+                alertBanner.classList.add('show');
             }
 
-            const trendData = data.trend.slice(-days).map(item => ({
-                date: item.date.split('T')[0],
-                amount: Math.max(item.amount, 0.01)
-            }));
+            // Render category stats
+            renderCategoryStats(data.categories);
 
-            const trendDates = trendData.map(d => d.date);
-            const trendValues = trendData.map(d => d.amount);
-            const lastValue = trendValues[trendValues.length - 1] || 0;
-            const forecastValues = [];
-            for (let i = 1; i <= 7; i++) forecastValues.push(lastValue * (1 + 0.02 * i));
-            for (let i = 1; i <= 7; i++) trendDates.push(`+${i}d`);
+            // Render charts
+            renderPieChart(data.categories);
+            renderLineChart(data.trends);
+            renderBarChart(data.trends);
 
-            // Index where the forecast begins (length of actual data)
-            const forecastStart = trendValues.length;
+            // Render comparison
+            renderComparison(data.comparison);
+        }
 
-            const gradientBlue = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientBlue.addColorStop(0, 'rgba(59,130,246,0.8)');
-            gradientBlue.addColorStop(1, 'rgba(59,130,246,0)');
+        // Render category statistics
+        function renderCategoryStats(categories) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '';
 
-            const gradientRed = ctx.createLinearGradient(0, 0, 0, 300);
-            gradientRed.addColorStop(0, 'rgba(239,68,68,0.8)');
-            gradientRed.addColorStop(1, 'rgba(239,68,68,0)');
+            Object.entries(categories).forEach(([key, value]) => {
+                const category = categories[key];
+                const changeClass = value.change >= 0 ? 'positive' : 'negative';
+                const changeIcon = value.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
 
-            window.trendChartInstance = new Chart(ctx, { // Store the chart instance
-                type: 'line',
+                const statCard = document.createElement('div');
+                statCard.className = `stat-card ${key}`;
+                statCard.innerHTML = `
+                    <div class="stat-header">
+                        <div class="stat-title">${category.name}</div>
+                        <div class="stat-icon">
+                            <i class="fas ${category.icon}"></i>
+                        </div>
+                    </div>
+                    <div class="stat-value">€${value.current.toFixed(2)}</div>
+                    <div class="stat-change ${changeClass}">
+                        <i class="fas ${changeIcon}"></i>
+                        <span>${Math.abs(value.change).toFixed(1)}% vs previous</span>
+                    </div>
+                `;
+                statsGrid.appendChild(statCard);
+            });
+        }
+
+        // Render pie chart
+        function renderPieChart(categories) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+
+            if (pieChart) {
+                pieChart.destroy();
+            }
+
+            const labels = Object.entries(categories).map(([key, _]) => categories[key].name);
+            const values = Object.values(categories).map(cat => cat.current);
+            const colors = Object.values(categories).map(cat => cat.color);
+
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
                 data: {
-                    labels: trendDates,
-                    datasets: [
-                        { label: 'Actual Spend (€)', data: trendValues.concat(Array(7).fill(null)), borderColor: '#3b82f6', backgroundColor: gradientBlue, fill: true, tension: 0.3, pointRadius: 3 },
-                        { label: 'Forecast (€)', data: Array(trendValues.length).fill(null).concat(forecastValues), borderColor: '#ef4444', backgroundColor: gradientRed, borderDash: [5, 5], fill: true, tension: 0.3, pointRadius: 3 }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors,
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
                 },
                 options: {
-                    interaction: { mode: 'nearest', intersect: false, axis: 'x' },
-                    scales: {
-                        x: {
-                            ticks: {
-                                color: getComputedStyle(document.body).getPropertyValue('--muted-color'),
-                                maxRotation: 45,
-                                minRotation: 45,
-                                callback: function (value, index, values) {
-                                    const label = this.getLabelForValue(value);
-                                    if (label.includes('+')) {
-                                        return label;
-                                    }
-                                    const parts = label.split('-');
-                                    // Format YYYY-MM-DD to MM/DD
-                                    return parts.length === 3 ? `${parts[1]}/${parts[2]}` : label;
-                                }
-                            },
-                            grid: {
-                                // Custom vertical line for forecast separation
-                                color: (context) => {
-                                    if (context.index === forecastStart - 1) {
-                                        return 'rgba(255, 255, 255, 0.4)'; // Brighter line at the pivot point
-                                    }
-                                    return 'rgba(100, 116, 139, 0.15)'; // Lighter grid lines
-                                },
-                                lineWidth: (context) => {
-                                    return context.index === forecastStart - 1 ? 2 : 1;
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#f1f5f9',
+                                padding: 15,
+                                font: {
+                                    size: 12
                                 }
                             }
                         },
-                        y: {
-                            // Ensure Y-axis starts at 0
-                            min: 0,
-                            ticks: {
-                                color: getComputedStyle(document.body).getPropertyValue('--muted-color'),
-                                // Reduced font size and added padding for better visual alignment
-                                font: {
-                                    size: 10
-                                },
-                                padding: 5,
-                                callback: function (value) {
-                                    // Abbreviated currency formatting
-                                    if (value >= 1000000) {
-                                        return '€' + (value / 1000000).toFixed(1) + 'M';
-                                    }
-                                    if (value >= 1000) {
-                                        return '€' + (value / 1000).toFixed(1) + 'K';
-                                    }
-                                    return '€' + value.toFixed(2);
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#f1f5f9',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: €${value.toFixed(2)} (${percentage}%)`;
                                 }
-                            },
-                            // Make horizontal grid lines very subtle
-                            grid: {
-                                color: 'rgba(100, 116, 139, 0.15)',
                             }
                         }
-                    },
-                    plugins: {
-                        tooltip: { backgroundColor: 'rgba(30,41,59,0.9)', titleColor: '#fff', bodyColor: '#fff' },
-                        legend: { display: false }
-                    },
-                    maintainAspectRatio: false
+                    }
                 }
             });
         }
 
-        function renderTopServices(data) {
-            const services = [];
-            for (const cat in data.categories) services.push({ name: cat, cost: data.categories[cat] });
-            services.sort((a, b) => b.cost - a.cost);
-            const top3 = services.slice(0, 3);
-            document.getElementById('topServices').innerHTML =
-                top3.map(s => `<span>${s.name}: €${s.cost.toFixed(2)}</span>`).join('');
+        // Render line chart
+        function renderLineChart(trends) {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+
+            if (lineChart) {
+                lineChart.destroy();
+            }
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trends.labels || [],
+                    datasets: [{
+                        label: 'Weekly Spending',
+                        data: trends.weekly || [],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#f1f5f9',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    return `€${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: '#334155'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function (value) {
+                                    return '€' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: '#334155'
+                            }
+                        }
+                    }
+                }
+            });
         }
 
-        fetchData();
+        // Render bar chart
+        function renderBarChart(trends) {
+            const ctx = document.getElementById('barChart').getContext('2d');
+
+            if (barChart) {
+                barChart.destroy();
+            }
+
+            barChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: trends.labels || [],
+                    datasets: [{
+                        label: 'Daily Spending',
+                        data: trends.daily || [],
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: '#667eea',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#f1f5f9',
+                            borderColor: '#334155',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function (context) {
+                                    return `€${context.parsed.y.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#94a3b8'
+                            },
+                            grid: {
+                                color: '#334155',
+                                display: false
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function (value) {
+                                    return '€' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: '#334155'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render comparison section
+        function renderComparison(comparison) {
+            const comparisonGrid = document.getElementById('comparisonGrid');
+            comparisonGrid.innerHTML = '';
+
+            const comparisons = [
+                { label: 'Today', value: comparison.today, previous: comparison.yesterday, period: 'vs Yesterday' },
+                { label: 'This Week', value: comparison.thisWeek, previous: comparison.lastWeek, period: 'vs Last Week' },
+                { label: 'This Month', value: comparison.thisMonth, previous: comparison.lastMonth, period: 'vs Last Month' }
+            ];
+
+            comparisons.forEach(comp => {
+                const diff = ((comp.value - comp.previous) / comp.previous * 100).toFixed(1);
+                const diffClass = diff >= 0 ? 'positive' : 'negative';
+                const diffIcon = diff >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+
+                const item = document.createElement('div');
+                item.className = 'comparison-item';
+                item.innerHTML = `
+                    <div class="comparison-label">${comp.label}</div>
+                    <div class="comparison-value">€${comp.value.toFixed(2)}</div>
+                    <div class="comparison-diff">
+                        <i class="fas ${diffIcon}"></i>
+                        <span class="${diffClass}">${Math.abs(diff)}%</span> ${comp.period}
+                    </div>
+                `;
+                comparisonGrid.appendChild(item);
+            });
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCostData();
+
+            // Refresh data every 5 minutes
+            setInterval(loadCostData, 300000);
+        });
     </script>
 </body>
 
