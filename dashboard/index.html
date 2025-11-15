@@ -357,6 +357,50 @@
 
 
 
+        .stat-card-header-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 10px;
+
+        }
+
+
+
+        .stat-card select {
+
+            padding: 0.4rem 0.8rem;
+
+            border-radius: 6px;
+
+            border: 1px solid var(--border-color);
+
+            background-color: var(--card-bg);
+
+            color: var(--text-primary);
+
+            font-size: 0.75rem;
+
+            cursor: pointer;
+
+            transition: all 0.3s ease;
+
+        }
+
+
+
+        .stat-card select:hover {
+
+            border-color: var(--primary-color);
+
+        }
+
+
+
         .stat-card::before {
 
             content: '';
@@ -579,7 +623,7 @@
 
             border-radius: 16px;
 
-            padding: 40px;
+            padding: 30px;
 
             margin-bottom: 30px;
 
@@ -590,6 +634,26 @@
             position: relative;
 
             overflow: hidden;
+
+            max-width: 900px;
+
+            margin-left: auto;
+
+            margin-right: auto;
+
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        }
+
+
+
+        .total-card:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 
         }
 
@@ -643,7 +707,7 @@
 
         .total-amount {
 
-            font-size: 4rem;
+            font-size: 3rem;
 
             font-weight: 700;
 
@@ -656,6 +720,90 @@
             background-clip: text;
 
             margin-bottom: 15px;
+
+            animation: fadeInScale 0.5s ease-out;
+
+        }
+
+
+
+        @keyframes fadeInScale {
+
+            from {
+
+                opacity: 0;
+
+                transform: scale(0.9);
+
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform: scale(1);
+
+            }
+
+        }
+
+
+
+        .total-card-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 20px;
+
+            flex-wrap: wrap;
+
+            gap: 15px;
+
+        }
+
+
+
+        .total-card-header .total-label {
+
+            margin-bottom: 0;
+
+            flex: 1;
+
+        }
+
+
+
+        .total-card select {
+
+            padding: 0.5rem 1rem;
+
+            border-radius: 8px;
+
+            border: 1px solid var(--border-color);
+
+            background-color: var(--card-bg);
+
+            color: var(--text-primary);
+
+            font-size: 0.9rem;
+
+            cursor: pointer;
+
+            transition: all 0.3s ease;
+
+        }
+
+
+
+        .total-card select:hover {
+
+            border-color: var(--primary-color);
+
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 
         }
 
@@ -1024,15 +1172,34 @@
 
             <div class="total-card-content">
 
-                <div class="total-label">Total AWS Spending (Last 14 Days)</div>
+                <div class="total-card-header">
+
+                    <div class="total-label">Total AWS Spending</div>
+
+                    <select id="timeRangeTotal" onchange="updateTotalSpending()">
+
+                        <option value="7">Last 7 Days</option>
+
+                        <option value="14" selected>Last 14 Days</option>
+
+                        <option value="30">Last 30 Days</option>
+
+                        <option value="365">Last 1 Year</option>
+
+                    </select>
+
+                </div>
 
                 <div class="total-amount" id="totalAmount">€0.00</div>
 
                 <div class="total-period" id="totalPeriod">Data Range: ...</div>
 
+                <div id="totalDateRange" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 5px;">
+                </div>
 
 
-                <div style="margin-top: 15px; max-width: 400px; margin-left: auto; margin-right: auto;">
+
+                <div style="margin-top: 20px; max-width: 500px; margin-left: auto; margin-right: auto;">
 
                     <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-secondary);">
 
@@ -1041,10 +1208,10 @@
                     </div>
 
                     <div
-                        style="height: 20px; background-color: var(--border-color); border-radius: 10px; overflow: hidden;">
+                        style="height: 20px; background-color: var(--border-color); border-radius: 10px; overflow: hidden; position: relative;">
 
                         <div id="spendProgress"
-                            style="height: 100%; background-color: var(--primary-color); width: 0%; text-align: right; padding-right: 5px; line-height: 20px; color: #fff; font-weight: 600; transition: width 1s ease-out, background-color 0.5s;">
+                            style="height: 100%; background-color: var(--primary-color); width: 0%; text-align: right; padding-right: 5px; line-height: 20px; color: #fff; font-weight: 600; transition: width 1s ease-out, background-color 0.5s; border-radius: 10px;">
 
                             0%</div>
 
@@ -1080,11 +1247,13 @@
 
                     <select id="timeRangePie" onchange="loadCostData()">
 
-                        <option value="14" selected>Last 14 Days</option>
-
                         <option value="7">Last 7 Days</option>
 
+                        <option value="14" selected>Last 14 Days</option>
+
                         <option value="30">Last 30 Days</option>
+
+                        <option value="365">Last 1 Year</option>
 
                     </select>
 
@@ -1114,11 +1283,13 @@
 
                     <select id="timeRangeLine" onchange="loadCostData()">
 
-                        <option value="14" selected>Last 14 Days</option>
-
                         <option value="7">Last 7 Days</option>
 
+                        <option value="14" selected>Last 14 Days</option>
+
                         <option value="30">Last 30 Days</option>
+
+                        <option value="365">Last 1 Year</option>
 
                     </select>
 
@@ -1241,6 +1412,64 @@
             // Treat very small/negative numbers as 0 for visualization
 
             return Math.max(0, value || 0);
+
+        }
+
+
+
+        // --- Date Formatting Functions ---
+
+        function formatDateFull(dateStr) {
+
+            // Format: "15 Nov 2025"
+
+            const date = new Date(dateStr + 'T00:00:00');
+
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+
+        }
+
+
+
+        function formatDateShort(dateStr) {
+
+            // Format: "dd.mm"
+
+            const parts = dateStr.split('-');
+
+            return `${parts[2]}.${parts[1]}`;
+
+        }
+
+
+
+        function getDateRange(days) {
+
+            const endDate = new Date();
+
+            const startDate = new Date();
+
+            startDate.setDate(startDate.getDate() - days);
+
+            return {
+
+                start: formatDateFull(startDate.toISOString().split('T')[0]),
+
+                end: formatDateFull(endDate.toISOString().split('T')[0])
+
+            };
+
+        }
+
+
+
+        function calculateTotalForPeriod(trendData, days) {
+
+            const recentData = trendData.slice(-days);
+
+            return recentData.reduce((sum, d) => sum + sanitizeData(d.amount), 0);
 
         }
 
@@ -1386,15 +1615,101 @@
 
         */
 
+        // --- Global data storage ---
+
+        let globalTrendData = null;
+
+        let globalCategories = null;
+
+
+
+        // --- Update Total Spending (called when dropdown changes) ---
+
+        function updateTotalSpending() {
+
+            if (!globalTrendData) return;
+
+            const timeRange = parseInt(document.getElementById('timeRangeTotal').value);
+
+            const total = calculateTotalForPeriod(globalTrendData, timeRange);
+
+            const threshold = BUDGET_THRESHOLD;
+
+            const dateRange = getDateRange(timeRange);
+
+
+
+            // Update total amount
+
+            document.getElementById("totalAmount").innerText = `€${total.toFixed(2)}`;
+
+            document.getElementById("totalPeriod").textContent = `Last ${timeRange} ${timeRange === 365 ? 'Year' : 'Days'}`;
+
+            document.getElementById("totalDateRange").textContent = `${dateRange.start} - ${dateRange.end}`;
+
+
+
+            // Update progress bar
+
+            const percent = Math.min(100, (total / threshold) * 100);
+
+            const progress = document.getElementById("spendProgress");
+
+            const progressBarColor = percent > 90 ? getComputedStyle(document.documentElement).getPropertyValue('--danger-color') : getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+
+            progress.style.width = percent + "%";
+
+            progress.style.backgroundColor = progressBarColor;
+
+            progress.innerText = `${percent.toFixed(1)}%`;
+
+
+
+            // Update alert
+
+            const alertBanner = document.getElementById('alertBanner');
+
+            const alertTitle = alertBanner.querySelector('strong');
+
+            const alertMessage = document.getElementById('alertMessage');
+
+            if (percent >= 100) {
+
+                alertBanner.classList.add('show');
+
+                alertTitle.textContent = 'CAUTION! Budget Exceeded';
+
+                alertMessage.textContent = `Your spending (€${total.toFixed(2)}) has exceeded the budget threshold (€${threshold}). Immediate action is required.`;
+
+            } else if (percent >= 90) {
+
+                alertBanner.classList.add('show');
+
+                alertTitle.textContent = 'Budget Alert!';
+
+                alertMessage.textContent = `Your spending (€${total.toFixed(2)}) is close to the threshold (€${threshold}).`;
+
+            } else {
+
+                alertBanner.classList.remove('show');
+
+            }
+
+        }
+
+
+
         // --- Render Dashboard ---
 
         function renderDashboard(data, timeRange) {
 
-            const total = sanitizeData(data.total_spend) || 0;
-
             const threshold = BUDGET_THRESHOLD;
 
             const trendData = data.trend || [];
+
+            globalTrendData = trendData;
+
+            globalCategories = data.categories || {};
 
 
 
@@ -1402,23 +1717,17 @@
 
             document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
 
-            document.getElementById('totalPeriod').textContent = `Data for last ${timeRange} Days`;
+
+
+            // Initialize total spending with default time range
+
+            updateTotalSpending();
 
 
 
-            // 2. Update Total Spend & Progress Bar
-
-            document.getElementById("totalAmount").innerText = `€${total.toFixed(2)}`;
+            // 2. Update threshold (static) - total spending is handled by updateTotalSpending()
 
             document.getElementById("threshold").innerText = `€${threshold}`;
-
-
-
-            const percent = Math.min(100, (total / threshold) * 100);
-
-            const progress = document.getElementById("spendProgress");
-
-            const progressBarColor = percent > 90 ? getComputedStyle(document.documentElement).getPropertyValue('--danger-color') : getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
 
 
 
@@ -1502,6 +1811,46 @@
 
 
 
+        // --- Update Category Spending (called when dropdown changes) ---
+
+        function updateCategorySpending(categoryKey, timeRange) {
+
+            if (!globalTrendData || !globalCategories) return;
+
+            // For now, we'll use the category percentage from total data
+
+            // In a real implementation, you'd fetch category-specific trend data
+
+            const categoryTotal = calculateTotalForPeriod(globalTrendData, timeRange);
+
+            const categoryRatio = (globalCategories[categoryKey] || 0) / (Object.values(globalCategories).reduce((a, b) => a + b, 0) || 1);
+
+            const categoryAmount = categoryTotal * categoryRatio;
+
+            const dateRange = getDateRange(timeRange);
+
+
+
+            // Find the card and update it
+
+            const card = document.querySelector(`.stat-card.${categoryKey}`);
+
+            if (card) {
+
+                const valueElement = card.querySelector('.stat-value');
+
+                const dateElement = card.querySelector('.stat-date-range');
+
+                if (valueElement) valueElement.textContent = `€${categoryAmount.toFixed(2)}`;
+
+                if (dateElement) dateElement.textContent = `${dateRange.start} - ${dateRange.end}`;
+
+            }
+
+        }
+
+
+
         // --- Render Category Stats ---
 
         function renderCategoryStats(categories) {
@@ -1521,6 +1870,10 @@
                 const changeIcon = value.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
 
                 const changePercentage = parseFloat(value.change);
+
+                const defaultTimeRange = 14;
+
+                const dateRange = getDateRange(defaultTimeRange);
 
 
 
@@ -1542,7 +1895,27 @@
 
                     </div>
 
+                    <div class="stat-card-header-row">
+
+                        <div style="font-size: 0.75rem; color: var(--text-secondary);">Time Range:</div>
+
+                        <select class="category-time-range" data-category="${key}" onchange="updateCategorySpending('${key}', parseInt(this.value))">
+
+                            <option value="7">7 Days</option>
+
+                            <option value="14" selected>14 Days</option>
+
+                            <option value="30">30 Days</option>
+
+                            <option value="365">1 Year</option>
+
+                        </select>
+
+                    </div>
+
                     <div class="stat-value">€${value.current.toFixed(2)}</div>
+
+                    <div class="stat-date-range" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">${dateRange.start} - ${dateRange.end}</div>
 
                     <div class="stat-change ${changeClass}">
 
@@ -1678,7 +2051,7 @@
 
 
 
-            const trendLabels = actualData.map(d => d.date.split('-').slice(1).join('/')); // MM/DD
+            const trendLabels = actualData.map(d => formatDateShort(d.date)); // dd.mm
 
             const trendValues = actualData.map(d => d.amount);
 
@@ -1704,7 +2077,7 @@
 
                 lastDate.setDate(lastDate.getDate() + i);
 
-                forecastLabels.push(lastDate.toISOString().split('T')[0].split('-').slice(1).join('/'));
+                forecastLabels.push(formatDateShort(lastDate.toISOString().split('T')[0]));
 
             }
 
@@ -1884,7 +2257,7 @@
 
 
 
-            const labels = displayData.map(d => d.date.split('-').slice(1).join('/'));
+            const labels = displayData.map(d => formatDateShort(d.date));
 
             const values = displayData.map(d => d.amount);
 
