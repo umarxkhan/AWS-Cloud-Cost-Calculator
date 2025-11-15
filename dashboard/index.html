@@ -6,13 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Cost Calculator - AWS Spending Dashboard</title>
 
-    <!-- Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -22,9 +19,11 @@
             box-sizing: border-box;
         }
 
+        /* --- THEME ROOT VARIABLES (ADDED Light Theme Support) --- */
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
+            /* Dark Theme (Default) */
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
@@ -40,12 +39,26 @@
             --gradient-5: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
         }
 
+        [data-theme='light'] {
+            /* Light Theme Overrides */
+            --dark-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --primary-color: #2563eb;
+            --secondary-color: #3b82f6;
+        }
+
+        /* --- END THEME ROOT VARIABLES --- */
+
         body {
             font-family: 'Inter', sans-serif;
             background: var(--dark-bg);
             color: var(--text-primary);
             min-height: 100vh;
             padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
             background-image:
                 radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.1) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
@@ -55,6 +68,29 @@
             max-width: 1400px;
             margin: 0 auto;
         }
+
+        /* --- Added Theme Toggle Button CSS --- */
+        .toggle-theme {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: background-color 0.2s, color 0.2s;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+
+        .toggle-theme:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        /* --- End Theme Toggle Button CSS --- */
 
         /* Header */
         .header {
@@ -99,6 +135,8 @@
             display: none;
             align-items: center;
             gap: 12px;
+            color: white;
+            /* Ensure alert text is white */
             animation: slideDown 0.3s ease-out;
         }
 
@@ -147,7 +185,6 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--gradient-1);
         }
 
         .stat-card:hover {
@@ -155,24 +192,52 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
-        .stat-card.compute::before {
+        /* Category specific borders (Adapted to use actual names) */
+        .stat-card.Compute::before {
             background: var(--gradient-1);
         }
 
-        .stat-card.storage::before {
+        .stat-card.Storage::before {
             background: var(--gradient-2);
         }
 
-        .stat-card.database::before {
+        .stat-card.Database::before {
             background: var(--gradient-3);
         }
 
-        .stat-card.networking::before {
+        .stat-card.Networking::before {
             background: var(--gradient-4);
         }
 
-        .stat-card.other::before {
+        .stat-card.Other::before {
             background: var(--gradient-5);
+        }
+
+        /* Category specific icons (Adapted to use actual names) */
+        .stat-card.Compute .stat-icon {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .stat-card.Storage .stat-icon {
+            background: rgba(240, 147, 251, 0.2);
+            color: #f093fb;
+        }
+
+        /* Updated color/gradient */
+        .stat-card.Database .stat-icon {
+            background: rgba(79, 172, 254, 0.2);
+            color: #4facfe;
+        }
+
+        .stat-card.Networking .stat-icon {
+            background: rgba(67, 233, 123, 0.2);
+            color: #43e97b;
+        }
+
+        .stat-card.Other .stat-icon {
+            background: rgba(250, 112, 154, 0.2);
+            color: #fa709a;
         }
 
         .stat-header {
@@ -198,31 +263,6 @@
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
-        }
-
-        .stat-card.compute .stat-icon {
-            background: rgba(102, 126, 234, 0.2);
-            color: #667eea;
-        }
-
-        .stat-card.storage .stat-icon {
-            background: rgba(245, 87, 108, 0.2);
-            color: #f5576c;
-        }
-
-        .stat-card.database .stat-icon {
-            background: rgba(79, 172, 254, 0.2);
-            color: #4facfe;
-        }
-
-        .stat-card.networking .stat-icon {
-            background: rgba(67, 233, 123, 0.2);
-            color: #43e97b;
-        }
-
-        .stat-card.other .stat-icon {
-            background: rgba(250, 112, 154, 0.2);
-            color: #fa709a;
         }
 
         .stat-value {
@@ -256,17 +296,6 @@
             text-align: center;
             position: relative;
             overflow: hidden;
-        }
-
-        .total-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
         }
 
         @keyframes rotate {
@@ -383,29 +412,21 @@
             color: var(--text-secondary);
         }
 
-        /* Loading State */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 400px;
-            flex-direction: column;
-            gap: 20px;
+        /* Dropdown/Select Styling */
+        select {
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            /* Use card background for consistency */
+            color: var(--text-primary);
+            appearance: none;
+            cursor: pointer;
         }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--border-color);
-            border-top-color: var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        [data-theme='light'] select {
+            background-color: #f1f5f9;
+            color: var(--text-primary);
         }
 
         /* Responsive */
@@ -423,6 +444,18 @@
             }
 
             .stat-card {
+                padding: 20px;
+            }
+
+            .toggle-theme {
+                position: static;
+                margin-bottom: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
                 padding: 20px;
             }
         }
@@ -452,9 +485,10 @@
     </style>
 </head>
 
-<body>
+<body data-theme="dark">
+    <button class="toggle-theme" onclick="toggleTheme()">☀️ Toggle Theme</button>
+
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>
                 <i class="fas fa-cloud"></i>
@@ -466,30 +500,37 @@
             </div>
         </div>
 
-        <!-- Alert Banner -->
         <div class="alert" id="alertBanner">
             <i class="fas fa-exclamation-triangle"></i>
             <div>
                 <strong>Budget Alert!</strong>
-                <span id="alertMessage">Your spending has exceeded the threshold.</span>
+                <span id="alertMessage">Spending is approaching the threshold.</span>
             </div>
         </div>
 
-        <!-- Total Spend Card -->
         <div class="total-card">
             <div class="total-card-content">
-                <div class="total-label">Total AWS Spending</div>
+                <div class="total-label">Total AWS Spending (Last 14 Days)</div>
                 <div class="total-amount" id="totalAmount">€0.00</div>
-                <div class="total-period" id="totalPeriod">Current Month</div>
+                <div class="total-period" id="totalPeriod">Data Range: ...</div>
+
+                <div style="margin-top: 15px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                    <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-secondary);">
+                        Budget Threshold: <span id="threshold">€500</span>
+                    </div>
+                    <div
+                        style="height: 20px; background-color: var(--border-color); border-radius: 10px; overflow: hidden;">
+                        <div id="spendProgress"
+                            style="height: 100%; background-color: var(--primary-color); width: 0%; text-align: right; padding-right: 5px; line-height: 20px; color: #fff; font-weight: 600; transition: width 1s ease-out, background-color 0.5s;">
+                            0%</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Category Stats -->
         <div class="stats-grid" id="statsGrid">
-            <!-- Stats will be populated by JavaScript -->
         </div>
 
-        <!-- Charts -->
         <div class="charts-grid">
             <div class="chart-card">
                 <div class="chart-header">
@@ -497,6 +538,11 @@
                         <i class="fas fa-chart-pie"></i>
                         Cost Distribution
                     </div>
+                    <select id="timeRangePie" onchange="loadCostData()">
+                        <option value="14" selected>Last 14 Days</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                    </select>
                 </div>
                 <div class="chart-container">
                     <canvas id="pieChart"></canvas>
@@ -507,8 +553,13 @@
                 <div class="chart-header">
                     <div class="chart-title">
                         <i class="fas fa-chart-line"></i>
-                        Spending Trends
+                        Spending Trend (Actual & Forecast)
                     </div>
+                    <select id="timeRangeLine" onchange="loadCostData()">
+                        <option value="14" selected>Last 14 Days</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                    </select>
                 </div>
                 <div class="chart-container">
                     <canvas id="lineChart"></canvas>
@@ -516,190 +567,232 @@
             </div>
         </div>
 
-        <!-- Comparison Section -->
         <div class="comparison-section">
             <div class="chart-header">
                 <div class="chart-title">
                     <i class="fas fa-balance-scale"></i>
-                    Weekly & Daily Comparison
+                    Comparison Metrics
                 </div>
             </div>
             <div class="comparison-grid" id="comparisonGrid">
-                <!-- Comparison data will be populated by JavaScript -->
             </div>
         </div>
 
-        <!-- Historical Trend Chart -->
         <div class="chart-card">
             <div class="chart-header">
                 <div class="chart-title">
-                    <i class="fas fa-chart-area"></i>
-                    Historical Cost Analysis
+                    <i class="fas fa-gem"></i>
+                    Top 5 Cost Categories
                 </div>
             </div>
             <div class="chart-container">
                 <canvas id="barChart"></canvas>
             </div>
         </div>
+
     </div>
 
-    <script>
-        // Chart instances
-        let pieChart, lineChart, barChart;
+    <footer style="margin-top:30px; text-align:center; font-size:0.8rem; color:var(--text-secondary);">
+        Built with ❤️ using AWS Lambda, DynamoDB, S3, CloudFront, and Chart.js
+    </footer>
 
-        // Category configuration
-        const categories = {
-            compute: {
-                name: 'Compute',
-                icon: 'fa-server',
-                color: '#667eea',
-                gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-            },
-            storage: {
-                name: 'Storage',
-                icon: 'fa-database',
-                color: '#f5576c',
-                gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
-            },
-            database: {
-                name: 'Database',
-                icon: 'fa-table',
-                color: '#4facfe',
-                gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-            },
-            networking: {
-                name: 'Networking',
-                icon: 'fa-network-wired',
-                color: '#43e97b',
-                gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
-            },
-            other: {
-                name: 'Other',
-                icon: 'fa-cube',
-                color: '#fa709a',
-                gradient: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
-            }
+    <script>
+        // --- Configuration Constants & Data Mapping ---
+        const CLOUD_FRONT_URL = "https://d2ksaxhe746mub.cloudfront.net";
+        const LOCAL_DATA_FILE = "data/cost_data.json";
+        const BUDGET_THRESHOLD = 500; // €500 threshold from project description
+
+        // Extended Category Map for all 5 categories
+        const CATEGORY_MAP = {
+            "Compute": { name: 'Compute', icon: 'fa-server', color: '#667eea' },
+            "Storage": { name: 'Storage', icon: 'fa-database', color: '#f093fb' },
+            "Database": { name: 'Database', icon: 'fa-table', color: '#4facfe' },
+            "Networking": { name: 'Networking', icon: 'fa-network-wired', color: '#43e97b' },
+            "Other": { name: 'Other', icon: 'fa-cube', color: '#fa709a' }
         };
 
-        // Load cost data
+        // --- Global State & Chart Instances ---
+        let rawData = null;
+        let pieChart, lineChart, barChart;
+
+        // Utility to sanitize and map data (crucial for near-zero costs)
+        function sanitizeData(value) {
+            // Treat very small/negative numbers as 0 for visualization
+            return Math.max(0, value);
+        }
+
+        // --- Theme Functions ---
+        function toggleTheme() {
+            const theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+            // Re-render charts to update colors if needed (using current data)
+            if (rawData) {
+                renderDashboard(rawData, document.getElementById('timeRangeLine').value);
+            }
+        }
+
+        function loadTheme() {
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.body.dataset.theme = saved;
+        }
+
+        // --- Data Fetching ---
         async function loadCostData() {
+            const timeRange = parseInt(document.getElementById('timeRangeLine').value);
+            let DATA_URL;
+
+            // Determine data source
+            if (window.location.hostname === "localhost" || window.location.protocol === "file:") {
+                DATA_URL = LOCAL_DATA_FILE;
+            } else {
+                // Use CloudFront URL for production deployment
+                DATA_URL = `${CLOUD_FRONT_URL}/data/cost_data.json?v=${Date.now()}`;
+            }
+
             try {
-                const response = await fetch('data/cost_data.json');
+                const response = await fetch(DATA_URL);
                 if (!response.ok) {
-                    throw new Error('Failed to load cost data');
+                    throw new Error('Failed to load cost data from source');
                 }
                 const data = await response.json();
-                renderDashboard(data);
+                rawData = data;
+                renderDashboard(data, timeRange);
+
             } catch (error) {
                 console.error('Error loading cost data:', error);
-                // Use sample data if file not found
-                renderDashboard(getSampleData());
+                // Use sample data if file not found or error occurred
+                renderDashboard(getSampleData(), timeRange);
             }
         }
 
-        // Sample data for demonstration
+        // Sample data for demonstration (Adapted for missing 'Storage' in your JSON)
         function getSampleData() {
-            return {
-                total: 485.75,
-                period: 'Current Month',
-                lastUpdated: new Date().toLocaleString(),
-                categories: {
-                    compute: { current: 185.50, previous: 165.20, change: 12.3 },
-                    storage: { current: 95.25, previous: 88.10, change: 8.1 },
-                    database: { current: 120.00, previous: 115.50, change: 3.9 },
-                    networking: { current: 65.00, previous: 70.20, change: -7.4 },
-                    other: { current: 20.00, previous: 18.50, change: 8.1 }
+            const currentData = {
+                "total_spend": 550.00,
+                "categories": {
+                    "Compute": 185.00,
+                    "Storage": 150.00, // Added to mock missing data
+                    "Database": 100.00,
+                    "Networking": 75.00,
+                    "Other": 40.00
                 },
-                trends: {
-                    daily: [45.2, 48.5, 42.1, 50.3, 47.8, 52.1, 49.5],
-                    weekly: [320.5, 345.2, 365.8, 385.4, 410.2, 435.6, 485.75],
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7']
-                },
-                comparison: {
-                    today: 52.1,
-                    yesterday: 49.5,
-                    thisWeek: 485.75,
-                    lastWeek: 435.6,
-                    thisMonth: 485.75,
-                    lastMonth: 420.3
-                },
-                alert: {
-                    active: false,
-                    message: ''
+                "trend": [
+                    { "date": "2025-11-01", "amount": 25.0 },
+                    { "date": "2025-11-02", "amount": 30.0 },
+                    { "date": "2025-11-03", "amount": 28.0 },
+                    { "date": "2025-11-04", "amount": 35.0 },
+                    { "date": "2025-11-05", "amount": 40.0 },
+                    { "date": "2025-11-06", "amount": 45.0 },
+                    { "date": "2025-11-07", "amount": 42.0 },
+                    { "date": "2025-11-08", "amount": 48.0 },
+                    { "date": "2025-11-09", "amount": 50.0 },
+                    { "date": "2025-11-10", "amount": 52.0 },
+                    { "date": "2025-11-11", "amount": 55.0 },
+                    { "date": "2025-11-12", "amount": 50.0 },
+                    { "date": "2025-11-13", "amount": 50.0 },
+                    { "date": "2025-11-14", "amount": 50.0 }
+                ],
+                "change_percentage": 5.0, // Mocked 5% increase vs prior period
+                "categories_previous": { // Mocked previous values for stats comparison
+                    "Compute": 160.00, "Storage": 130.00, "Database": 95.00, "Networking": 80.00, "Other": 30.00
                 }
             };
+            return currentData;
         }
 
-        // Render the dashboard
-        function renderDashboard(data) {
-            // Update header
-            document.getElementById('lastUpdated').textContent =
-                data.lastUpdated || new Date().toLocaleString();
+        // --- Render Dashboard ---
+        function renderDashboard(data, timeRange) {
+            const total = sanitizeData(data.total_spend) || 0;
+            const threshold = BUDGET_THRESHOLD;
+            const trendData = data.trend || [];
 
-            // Update total
-            document.getElementById('totalAmount').textContent =
-                `€${data.total.toFixed(2)}`;
-            document.getElementById('totalPeriod').textContent = data.period || 'Current Month';
+            // 1. Update Header
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+            document.getElementById('totalPeriod').textContent = `Last ${timeRange} Days`;
 
-            // Show alert if active
-            if (data.alert && data.alert.active) {
-                const alertBanner = document.getElementById('alertBanner');
-                document.getElementById('alertMessage').textContent = data.alert.message;
+            // 2. Update Total Spend & Progress Bar
+            document.getElementById("totalAmount").innerText = `€${total.toFixed(2)}`;
+            document.getElementById("threshold").innerText = `€${threshold}`;
+
+            const percent = Math.min(100, (total / threshold) * 100);
+            const progress = document.getElementById("spendProgress");
+            const progressBarColor = percent > 90 ? getComputedStyle(document.documentElement).getPropertyValue('--danger-color') : getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+
+            progress.style.width = percent + "%";
+            progress.style.backgroundColor = progressBarColor;
+            progress.innerText = `${percent.toFixed(1)}%`;
+
+            // 3. Alert Banner
+            const alertBanner = document.getElementById('alertBanner');
+            if (percent >= 90) {
                 alertBanner.classList.add('show');
+                document.getElementById('alertMessage').textContent = `Your spending (€${total.toFixed(2)}) is close to the threshold (€${threshold}).`;
+            } else {
+                alertBanner.classList.remove('show');
             }
 
-            // Render category stats
-            renderCategoryStats(data.categories);
+            // 4. Render Categories & Charts
+            const filteredCategories = Object.keys(CATEGORY_MAP).reduce((acc, key) => {
+                const current = sanitizeData(data.categories[key]) || 0;
+                // Simple comparison logic (needs proper historical data from DynamoDB in Python)
+                const previous = sanitizeData(data.categories_previous?.[key]) || current * 0.95;
+                const change = previous > 0 ? ((current - previous) / previous * 100) : 0;
 
-            // Render charts
-            renderPieChart(data.categories);
-            renderLineChart(data.trends);
-            renderBarChart(data.trends);
+                acc[key] = {
+                    current: current,
+                    previous: previous,
+                    change: change.toFixed(1)
+                };
+                return acc;
+            }, {});
 
-            // Render comparison
-            renderComparison(data.comparison);
+            renderCategoryStats(filteredCategories);
+            renderPieChart(filteredCategories);
+            renderLineChart(trendData, timeRange);
+            renderComparison(trendData, timeRange);
+            renderBarChart(filteredCategories);
         }
 
-        // Render category statistics
+        // 5. Render Category Statistics (using new filteredCategories structure)
         function renderCategoryStats(categories) {
             const statsGrid = document.getElementById('statsGrid');
             statsGrid.innerHTML = '';
 
             Object.entries(categories).forEach(([key, value]) => {
-                const category = categories[key];
+                const categoryConfig = CATEGORY_MAP[key];
                 const changeClass = value.change >= 0 ? 'positive' : 'negative';
                 const changeIcon = value.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                const changePercentage = parseFloat(value.change);
 
                 const statCard = document.createElement('div');
                 statCard.className = `stat-card ${key}`;
                 statCard.innerHTML = `
                     <div class="stat-header">
-                        <div class="stat-title">${category.name}</div>
+                        <div class="stat-title">${categoryConfig.name}</div>
                         <div class="stat-icon">
-                            <i class="fas ${category.icon}"></i>
+                            <i class="fas ${categoryConfig.icon}"></i>
                         </div>
                     </div>
                     <div class="stat-value">€${value.current.toFixed(2)}</div>
                     <div class="stat-change ${changeClass}">
                         <i class="fas ${changeIcon}"></i>
-                        <span>${Math.abs(value.change).toFixed(1)}% vs previous</span>
+                        <span>${Math.abs(changePercentage).toFixed(1)}% vs previous</span>
                     </div>
                 `;
                 statsGrid.appendChild(statCard);
             });
         }
 
-        // Render pie chart
+        // 6. Render Pie Chart (Doughnut Chart)
         function renderPieChart(categories) {
             const ctx = document.getElementById('pieChart').getContext('2d');
 
-            if (pieChart) {
-                pieChart.destroy();
-            }
+            if (pieChart) pieChart.destroy();
 
-            const labels = Object.entries(categories).map(([key, _]) => categories[key].name);
-            const values = Object.values(categories).map(cat => cat.current);
-            const colors = Object.values(categories).map(cat => cat.color);
+            const labels = Object.keys(categories);
+            const values = labels.map(key => categories[key].current);
+            const colors = labels.map(key => CATEGORY_MAP[key].color);
 
             pieChart = new Chart(ctx, {
                 type: 'doughnut',
@@ -708,7 +801,8 @@
                     datasets: [{
                         data: values,
                         backgroundColor: colors,
-                        borderWidth: 0,
+                        borderColor: getComputedStyle(document.body).getPropertyValue('--card-bg'),
+                        borderWidth: 2,
                         hoverOffset: 10
                     }]
                 },
@@ -716,28 +810,19 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: '#f1f5f9',
-                                padding: 15,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
+                        legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-primary'), padding: 15 } },
                         tooltip: {
-                            backgroundColor: '#1e293b',
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#f1f5f9',
-                            borderColor: '#334155',
+                            backgroundColor: getComputedStyle(document.body).getPropertyValue('--card-bg'),
+                            titleColor: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                            bodyColor: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                            borderColor: getComputedStyle(document.body).getPropertyValue('--border-color'),
                             borderWidth: 1,
                             callbacks: {
                                 label: function (context) {
                                     const label = context.label || '';
                                     const value = context.parsed || 0;
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
                                     return `${label}: €${value.toFixed(2)} (${percentage}%)`;
                                 }
                             }
@@ -747,98 +832,135 @@
             });
         }
 
-        // Render line chart
-        function renderLineChart(trends) {
+        // 7. Render Line Chart (Trend with Forecast)
+        function renderLineChart(trendData, days) {
             const ctx = document.getElementById('lineChart').getContext('2d');
+            if (lineChart) lineChart.destroy();
 
-            if (lineChart) {
-                lineChart.destroy();
+            const actualData = trendData.slice(-days).map(d => ({
+                date: d.date,
+                amount: sanitizeData(d.amount)
+            }));
+
+            const trendLabels = actualData.map(d => d.date.split('-').slice(1).join('/')); // MM/DD
+            const trendValues = actualData.map(d => d.amount);
+            const lastValue = trendValues[trendValues.length - 1] || 0;
+
+            // Simple 7-day projection placeholder (as per project plan)
+            const forecastDays = 7;
+            const forecastValues = [];
+            const forecastLabels = [];
+
+            for (let i = 1; i <= forecastDays; i++) {
+                // Mock 2% linear growth for forecast
+                forecastValues.push(lastValue * (1 + 0.02 * i));
+
+                const lastDate = new Date(actualData[actualData.length - 1].date);
+                lastDate.setDate(lastDate.getDate() + i);
+                forecastLabels.push(lastDate.toISOString().split('T')[0].split('-').slice(1).join('/'));
             }
+
+            const allLabels = trendLabels.concat(forecastLabels);
+
+            const primaryColor = getComputedStyle(document.body).getPropertyValue('--primary-color');
+            const dangerColor = getComputedStyle(document.body).getPropertyValue('--danger-color');
+            const mutedColor = getComputedStyle(document.body).getPropertyValue('--text-secondary');
+            const gridColor = getComputedStyle(document.body).getPropertyValue('--border-color');
+
+            const gradientActual = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientActual.addColorStop(0, `${primaryColor}CC`);
+            gradientActual.addColorStop(1, `${primaryColor}00`);
+
+            const gradientForecast = ctx.createLinearGradient(0, 0, 0, 300);
+            gradientForecast.addColorStop(0, `${dangerColor}CC`);
+            gradientForecast.addColorStop(1, `${dangerColor}00`);
 
             lineChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: trends.labels || [],
-                    datasets: [{
-                        label: 'Weekly Spending',
-                        data: trends.weekly || [],
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointHoverRadius: 7,
-                        pointBackgroundColor: '#667eea',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
+                    labels: allLabels,
+                    datasets: [
+                        {
+                            label: 'Actual Spend (€)',
+                            data: trendValues.concat(Array(forecastDays).fill(null)),
+                            borderColor: primaryColor,
+                            backgroundColor: gradientActual,
+                            fill: 'start',
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: primaryColor,
+                            pointBorderColor: getComputedStyle(document.body).getPropertyValue('--card-bg'),
+                        },
+                        {
+                            label: 'Forecast (€)',
+                            data: Array(trendValues.length).fill(null).concat(forecastValues),
+                            borderColor: dangerColor,
+                            backgroundColor: gradientForecast,
+                            borderDash: [8, 4],
+                            fill: 'start',
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: dangerColor,
+                            pointBorderColor: getComputedStyle(document.body).getPropertyValue('--card-bg'),
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: {
-                            labels: {
-                                color: '#f1f5f9'
-                            }
-                        },
+                        legend: { labels: { color: getComputedStyle(document.body).getPropertyValue('--text-primary') } },
                         tooltip: {
-                            backgroundColor: '#1e293b',
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#f1f5f9',
-                            borderColor: '#334155',
+                            backgroundColor: getComputedStyle(document.body).getPropertyValue('--card-bg'),
+                            titleColor: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                            bodyColor: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                            borderColor: gridColor,
                             borderWidth: 1,
                             callbacks: {
-                                label: function (context) {
-                                    return `€${context.parsed.y.toFixed(2)}`;
-                                }
+                                label: (context) => `${context.dataset.label}: €${context.parsed.y.toFixed(2)}`
                             }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: {
-                                color: '#94a3b8'
-                            },
-                            grid: {
-                                color: '#334155'
-                            }
+                            ticks: { color: mutedColor },
+                            grid: { color: gridColor }
                         },
                         y: {
-                            ticks: {
-                                color: '#94a3b8',
-                                callback: function (value) {
-                                    return '€' + value.toFixed(0);
-                                }
-                            },
-                            grid: {
-                                color: '#334155'
-                            }
+                            min: 0,
+                            ticks: { color: mutedColor, callback: (value) => value >= 1000 ? `€${(value / 1000).toFixed(1)}K` : `€${value.toFixed(0)}` },
+                            grid: { color: gridColor }
                         }
                     }
                 }
             });
         }
 
-        // Render bar chart
-        function renderBarChart(trends) {
+        // 8. Render Top Services (Bar Chart area repurposed for this visualization)
+        function renderBarChart(categories) {
             const ctx = document.getElementById('barChart').getContext('2d');
+            if (barChart) barChart.destroy();
 
-            if (barChart) {
-                barChart.destroy();
-            }
+            const sortedCategories = Object.entries(categories)
+                .map(([name, data]) => ({ name: name, cost: data.current }))
+                .sort((a, b) => b.cost - a.cost)
+                .slice(0, 5); // Top 5
+
+            const labels = sortedCategories.map(s => s.name);
+            const values = sortedCategories.map(s => s.cost);
+            const colors = sortedCategories.map(s => CATEGORY_MAP[s.name].color);
 
             barChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: trends.labels || [],
+                    labels: labels,
                     datasets: [{
-                        label: 'Daily Spending',
-                        data: trends.daily || [],
-                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                        borderColor: '#667eea',
-                        borderWidth: 2,
+                        label: 'Cost (€)',
+                        data: values,
+                        backgroundColor: colors.map(c => `${c}CC`),
+                        borderColor: colors,
+                        borderWidth: 1,
                         borderRadius: 8,
                         borderSkipped: false
                     }]
@@ -846,71 +968,69 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    indexAxis: 'y', // Make it a horizontal bar chart
                     plugins: {
-                        legend: {
-                            labels: {
-                                color: '#f1f5f9'
-                            }
-                        },
+                        legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#1e293b',
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#f1f5f9',
-                            borderColor: '#334155',
+                            backgroundColor: getComputedStyle(document.body).getPropertyValue('--card-bg'),
+                            titleColor: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                            bodyColor: getComputedStyle(document.body).getPropertyValue('--text-primary'),
+                            borderColor: getComputedStyle(document.body).getPropertyValue('--border-color'),
                             borderWidth: 1,
                             callbacks: {
-                                label: function (context) {
-                                    return `€${context.parsed.y.toFixed(2)}`;
-                                }
+                                label: function (context) { return `€${context.parsed.x.toFixed(2)}`; }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            ticks: {
-                                color: '#94a3b8'
-                            },
-                            grid: {
-                                color: '#334155',
-                                display: false
-                            }
+                            min: 0,
+                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary'), callback: (value) => `€${value.toFixed(0)}` },
+                            grid: { color: getComputedStyle(document.body).getPropertyValue('--border-color') }
                         },
                         y: {
-                            ticks: {
-                                color: '#94a3b8',
-                                callback: function (value) {
-                                    return '€' + value.toFixed(0);
-                                }
-                            },
-                            grid: {
-                                color: '#334155'
-                            }
+                            ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-primary') },
+                            grid: { display: false }
                         }
                     }
                 }
             });
         }
 
-        // Render comparison section
-        function renderComparison(comparison) {
+        // 9. Render Comparison Section (Needs real data calculation on the Lambda side)
+        function renderComparison(trendData, timeRange) {
             const comparisonGrid = document.getElementById('comparisonGrid');
-            comparisonGrid.innerHTML = '';
 
-            const comparisons = [
-                { label: 'Today', value: comparison.today, previous: comparison.yesterday, period: 'vs Yesterday' },
-                { label: 'This Week', value: comparison.thisWeek, previous: comparison.lastWeek, period: 'vs Last Week' },
-                { label: 'This Month', value: comparison.thisMonth, previous: comparison.lastMonth, period: 'vs Last Month' }
+            // Note: In a real implementation, these comparison values would be calculated 
+            // in the Lambda function and included in the JSON file.
+
+            // Mock Calculation based on current trend data (Last day vs day before, Last 7 days vs prior 7)
+            const today = trendData.length > 0 ? sanitizeData(trendData[trendData.length - 1].amount) : 0;
+            const yesterday = trendData.length > 1 ? sanitizeData(trendData[trendData.length - 2].amount) : today * 0.9;
+
+            const totalLast7 = trendData.slice(-7).reduce((sum, d) => sum + sanitizeData(d.amount), 0);
+            const totalPrior7 = trendData.slice(-14, -7).reduce((sum, d) => sum + sanitizeData(d.amount), 0) || totalLast7 * 0.9;
+
+            const totalLast30 = trendData.slice(-30).reduce((sum, d) => sum + sanitizeData(d.amount), 0);
+            const totalPrior30 = trendData.slice(-60, -30).reduce((sum, d) => sum + sanitizeData(d.amount), 0) || totalLast30 * 0.9;
+
+            const comparisonValues = [
+                { label: 'Today', value: today, previous: yesterday, period: 'vs Yesterday' },
+                { label: 'Last 7 Days', value: totalLast7, previous: totalPrior7, period: 'vs Prior 7 Days' },
+                { label: 'Last 30 Days', value: totalLast30, previous: totalPrior30, period: 'vs Prior 30 Days' }
             ];
 
-            comparisons.forEach(comp => {
-                const diff = ((comp.value - comp.previous) / comp.previous * 100).toFixed(1);
+            comparisonGrid.innerHTML = '';
+
+            comparisonValues.forEach(comp => {
+                const diff = comp.previous > 0 ? ((comp.value - comp.previous) / comp.previous * 100).toFixed(1) : 0;
                 const diffClass = diff >= 0 ? 'positive' : 'negative';
                 const diffIcon = diff >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
 
                 const item = document.createElement('div');
                 item.className = 'comparison-item';
                 item.innerHTML = `
-                    <div class="comparison-label">${comp.label}</div>
+                    <div class="comparison-label">${comp.label} Spend</div>
                     <div class="comparison-value">€${comp.value.toFixed(2)}</div>
                     <div class="comparison-diff">
                         <i class="fas ${diffIcon}"></i>
@@ -921,13 +1041,13 @@
             });
         }
 
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCostData();
 
-            // Refresh data every 5 minutes
-            setInterval(loadCostData, 300000);
-        });
+        // Initialize dashboard
+        loadTheme();
+        loadCostData();
+
+        // Refresh data every 5 minutes
+        setInterval(loadCostData, 300000); 
     </script>
 </body>
 
