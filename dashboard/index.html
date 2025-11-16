@@ -1284,9 +1284,13 @@
 
             let DATA_URL;
 
+            // Check if running locally (localhost, 127.0.0.1, or file:// protocol)
+            const isLocal = window.location.hostname === "localhost" ||
+                window.location.hostname === "127.0.0.1" ||
+                window.location.protocol === "file:" ||
+                window.location.hostname === "";
 
-
-            if (window.location.hostname === "localhost" || window.location.protocol === "file:") {
+            if (isLocal) {
 
                 DATA_URL = LOCAL_DATA_FILE;
 
@@ -1320,6 +1324,8 @@
 
                 console.error('Error loading cost data:', error);
 
+                console.log('Falling back to sample data for local testing');
+
                 // Fallback to sample data for visualization if load fails
 
                 renderDashboard(getSampleData(), timeRange);
@@ -1328,63 +1334,41 @@
 
         }
 
-        /*
-
-                // Sample data for demonstration (Mocked for robust chart visualization)
-
-                function getSampleData() {
-
-                    return {
-
-                        "total_spend": 485.75,
-
-                        "categories": {
-
-                            "Compute": 185.50,
-
-                            "Storage": 95.25,
-
-                            "Database": 120.00,
-
-                            "Networking": 65.00,
-
-                            "Other": 20.00
-
-                        },
-
-                        // Mock trends to simulate full data array
-
-                        "trend": [
-
-                            { "date": "2025-11-01", "amount": 25.0 }, { "date": "2025-11-02", "amount": 30.0 },
-
-                            { "date": "2025-11-03", "amount": 28.0 }, { "date": "2025-11-04", "amount": 35.0 },
-
-                            { "date": "2025-11-05", "amount": 40.0 }, { "date": "2025-11-06", "amount": 45.0 },
-
-                            { "date": "2025-11-07", "amount": 42.0 }, { "date": "2025-11-08", "amount": 48.0 },
-
-                            { "date": "2025-11-09", "amount": 50.0 }, { "date": "2025-11-10", "amount": 52.0 },
-
-                            { "date": "2025-11-11", "amount": 55.0 }, { "date": "2025-11-12", "amount": 50.0 },
-
-                            { "date": "2025-11-13", "amount": 50.0 }, { "date": "2025-11-14", "amount": 50.0 }
-
-                        ],
-
-                        // Mocked previous values for stats comparison
-
-                        "categories_previous": {
-
-                            "Compute": 160.00, "Storage": 88.00, "Database": 115.00, "Networking": 70.00, "Other": 18.00
-
-                        }
-
-                    };
-
+        // Sample data for demonstration (Mocked for robust chart visualization)
+        function getSampleData() {
+            return {
+                "total_spend": 485.75,
+                "categories": {
+                    "Compute": 185.50,
+                    "Storage": 95.25,
+                    "Database": 120.00,
+                    "Networking": 65.00,
+                    "Other": 20.00
+                },
+                // Mock trends to simulate full data array
+                "trend": [
+                    { "date": "2025-01-01", "amount": 25.0 }, { "date": "2025-01-02", "amount": 30.0 },
+                    { "date": "2025-01-03", "amount": 28.0 }, { "date": "2025-01-04", "amount": 35.0 },
+                    { "date": "2025-01-05", "amount": 40.0 }, { "date": "2025-01-06", "amount": 45.0 },
+                    { "date": "2025-01-07", "amount": 42.0 }, { "date": "2025-01-08", "amount": 48.0 },
+                    { "date": "2025-01-09", "amount": 50.0 }, { "date": "2025-01-10", "amount": 52.0 },
+                    { "date": "2025-01-11", "amount": 55.0 }, { "date": "2025-01-12", "amount": 50.0 },
+                    { "date": "2025-01-13", "amount": 50.0 }, { "date": "2025-01-14", "amount": 50.0 },
+                    { "date": "2025-01-15", "amount": 48.0 }, { "date": "2025-01-16", "amount": 52.0 },
+                    { "date": "2025-01-17", "amount": 55.0 }, { "date": "2025-01-18", "amount": 53.0 },
+                    { "date": "2025-01-19", "amount": 57.0 }, { "date": "2025-01-20", "amount": 60.0 },
+                    { "date": "2025-01-21", "amount": 58.0 }, { "date": "2025-01-22", "amount": 62.0 },
+                    { "date": "2025-01-23", "amount": 65.0 }, { "date": "2025-01-24", "amount": 63.0 },
+                    { "date": "2025-01-25", "amount": 67.0 }, { "date": "2025-01-26", "amount": 70.0 },
+                    { "date": "2025-01-27", "amount": 68.0 }, { "date": "2025-01-28", "amount": 72.0 },
+                    { "date": "2025-01-29", "amount": 75.0 }, { "date": "2025-01-30", "amount": 73.0 }
+                ],
+                // Mocked previous values for stats comparison
+                "categories_previous": {
+                    "Compute": 160.00, "Storage": 88.00, "Database": 115.00, "Networking": 70.00, "Other": 18.00
                 }
-
-        */
+            };
+        }
 
         // --- Render Dashboard ---
 
