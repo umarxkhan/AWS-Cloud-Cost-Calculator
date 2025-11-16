@@ -1385,8 +1385,11 @@
             // 1. Update Header
 
             const now = new Date();
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('lastUpdated').textContent = now.toLocaleDateString('en-US', options);
+            const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+            const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            const dateStr = now.toLocaleDateString('en-US', dateOptions);
+            const timeStr = now.toLocaleTimeString('en-US', timeOptions);
+            document.getElementById('lastUpdated').textContent = `${dateStr} at ${timeStr}`;
 
             document.getElementById('totalPeriod').textContent = `Data for last ${timeRange} Days`;
 
