@@ -1024,7 +1024,19 @@
 
             <div class="total-card-content">
 
-                <div class="total-label">Total AWS Spending (Last 14 Days)</div>
+                <div class="total-label">Total AWS Spending</div>
+
+                <div style="margin-top:8px; margin-bottom:12px;">
+                    <label for="totalRangeSelect"
+                        style="font-size:0.9rem; color:var(--text-secondary); margin-right:8px;">Period:</label>
+                    <select id="totalRangeSelect"
+                        onchange="renderDashboard(rawData, document.getElementById('timeRangeLine').value)">
+                        <option value="7">Last 7 Days</option>
+                        <option value="14" selected>Last 14 Days</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                </div>
 
                 <div class="total-amount" id="totalAmount">€0.00</div>
 
@@ -1374,11 +1386,30 @@
 
         function renderDashboard(data, timeRange) {
 
-            const total = sanitizeData(data.total_spend) || 0;
-
             const threshold = BUDGET_THRESHOLD;
 
             const trendData = data.trend || [];
+
+            const totalRange = (document.getElementById('totalRangeSelect') && document.getElementById('totalRangeSelect').value) ? document.getElementById('totalRangeSelect').value : '14';
+
+            let total = sanitizeData(data.total_spend) || 0;
+            if (trendData.length > 0) {
+                if (totalRange === '7' || totalRange === '14') {
+                    const days = parseInt(totalRange, 10);
+                    total = trendData.slice(-days).reduce((s, d) => s + sanitizeData(d.amount), 0);
+                } else if (totalRange === 'month') {
+                    const now = new Date();
+                    const month = now.getMonth() + 1;
+                    const year = now.getFullYear();
+                    total = trendData.filter(d => {
+                        const [y, m] = d.date.split('-');
+                        return parseInt(y, 10) === year && parseInt(m, 10) === month;
+                    }).reduce((s, d) => s + sanitizeData(d.amount), 0);
+                } else if (totalRange === 'year') {
+                    const year = new Date().getFullYear();
+                    total = trendData.filter(d => d.date.split('-')[0] == String(year)).reduce((s, d) => s + sanitizeData(d.amount), 0);
+                }
+            }
 
 
 
@@ -1391,7 +1422,21 @@
             const timeStr = now.toLocaleTimeString('en-US', timeOptions);
             document.getElementById('lastUpdated').textContent = `${dateStr} at ${timeStr}`;
 
-            document.getElementById('totalPeriod').textContent = `Data for last ${timeRange} Days`;
+            // Update the displayed total period based on the selected totalRange (7/14/month/year)
+            let periodText = '';
+            if (typeof totalRange !== 'undefined' && (totalRange === '7' || totalRange === '14')) {
+                periodText = `Data for last ${totalRange} Days`;
+            } else if (typeof totalRange !== 'undefined' && totalRange === 'month') {
+                const nowMonth = new Date();
+                const monthText = nowMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                periodText = `Data for ${monthText}`;
+            } else if (typeof totalRange !== 'undefined' && totalRange === 'year') {
+                const y = new Date().getFullYear();
+                periodText = `Data for Year ${y}`;
+            } else {
+                periodText = `Data for last ${timeRange} Days`;
+            }
+            document.getElementById('totalPeriod').textContent = periodText;
 
 
 
