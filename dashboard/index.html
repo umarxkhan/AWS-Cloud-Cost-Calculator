@@ -989,208 +989,267 @@
                 <i class="fas fa-cloud"></i>
 
                 Cloud Cost Calculator
+                function renderDashboard(data, timeRange) {
 
-            </h1>
+                const threshold = BUDGET_THRESHOLD;
 
-            <div class="last-updated">
+                const trendData = data.trend || [];
 
-                <i class="fas fa-clock"></i>
+                const totalRange = (document.getElementById('totalRangeSelect') &&
+                document.getElementById('totalRangeSelect').value) ? document.getElementById('totalRangeSelect').value :
+                '14';
 
-                <span id="lastUpdated">Loading...</span>
+                // Compute period total using trend when available
+                let total = sanitizeData(data.total_spend) || 0;
+                if (trendData.length > 0) {
+                if (totalRange === '7' || totalRange === '14') {
+                const days = parseInt(totalRange, 10);
+                total = trendData.slice(-days).reduce((s, d) => s + sanitizeData(d.amount), 0);
+                } else if (totalRange === 'month') {
+                const now = new Date();
+                const month = now.getMonth() + 1;
+                const year = now.getFullYear();
+                total = trendData.filter(d => {
+                const [y, m] = d.date.split('-');
+                return parseInt(y, 10) === year && parseInt(m, 10) === month;
+                }).reduce((s, d) => s + sanitizeData(d.amount), 0);
+                } else if (totalRange === 'year') {
+                const year = new Date().getFullYear();
+                total = trendData.filter(d => d.date.split('-')[0] == String(year)).reduce((s, d) => s +
+                sanitizeData(d.amount), 0);
+                }
+                }
+
+
+                // 1. Update Header
+
+                const now = new Date();
+                const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                const dateStr = now.toLocaleDateString('en-US', dateOptions);
+                const timeStr = now.toLocaleTimeString('en-US', timeOptions);
+                document.getElementById('lastUpdated').textContent = `${dateStr} at ${timeStr}`;
+
+                // Update the displayed total period based on the selected totalRange (7/14/month/year)
+                let periodText = '';
+                if (typeof totalRange !== 'undefined' && (totalRange === '7' || totalRange === '14')) {
+                periodText = `Data for last ${totalRange} Days`;
+                } else if (typeof totalRange !== 'undefined' && totalRange === 'month') {
+                const nowMonth = new Date();
+                const monthText = nowMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                periodText = `Data for ${monthText}`;
+                } else if (typeof totalRange !== 'undefined' && totalRange === 'year') {
+                const y = new Date().getFullYear();
+                periodText = `Data for Year ${y}`;
+                } else {
+                periodText = `Data for last ${timeRange} Days`;
+                }
+                document.getElementById('totalPeriod').textContent = periodText;
+
+
+
+                // 2. Update Total Spend & Progress Bar
+
+                document.getElementById("totalAmount").innerText = `€${total.toFixed(2)}`;
+
+                document.getElementById("threshold").innerText = `€${threshold}`;
+
+
+                const percent = Math.min(100, (total / threshold) * 100);
+
+                const progress = document.getElementById("spendProgress");
+
+                const progressBarColor = percent > 90 ?
+                getComputedStyle(document.documentElement).getPropertyValue('--danger-color') :
+                getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+
+
+                progress.style.width = percent + "%";
+
+                progress.style.backgroundColor = progressBarColor;
+
+                progress.innerText = `${percent.toFixed(1)}%`;
+
+
+                // 3. Alert Banner
+
+                const alertBanner = document.getElementById('alertBanner');
+                const alertTitle = alertBanner.querySelector('strong');
+                const alertMessage = document.getElementById('alertMessage');
+
+                if (percent >= 100) {
+
+                alertBanner.classList.add('show');
+                alertTitle.textContent = 'CAUTION! Budget Exceeded';
+                alertMessage.textContent = `Your spending (€${total.toFixed(2)}) has exceeded the budget threshold
+                (€${threshold}). Immediate action is required.`;
+
+                } else if (percent >= 90) {
+
+                alertBanner.classList.add('show');
+                alertTitle.textContent = 'Budget Alert!';
+                alertMessage.textContent = `Your spending (€${total.toFixed(2)}) is close to the threshold
+                (€${threshold}).`;
+
+                } else {
+
+                alertBanner.classList.remove('show');
+
+                }
+
+
+
+                // 4. Prepare Categories for Stats and Pie Chart
+
+                // Helper: sum amounts
+                const sumAmounts = arr => arr.reduce((s, d) => s + sanitizeData(d.amount), 0);
+
+                // Build period and previous period slices based on selection
+                let periodTrend = [];
+                let prevTrend = [];
+
+                if (totalRange === '7' || totalRange === '14') {
+                const days = parseInt(totalRange, 10);
+                periodTrend = trendData.slice(-days);
+                prevTrend = trendData.slice(-2 * days, -days);
+                } else if (totalRange === 'month') {
+                const month = now.getMonth() + 1;
+                const year = now.getFullYear();
+                periodTrend = trendData.filter(d => {
+                const [y, m] = d.date.split('-');
+                return parseInt(y, 10) === year && parseInt(m, 10) === month;
+                });
+                let prevMonth = month - 1;
+                let prevYear = year;
+                if (prevMonth === 0) { prevMonth = 12; prevYear = year - 1; }
+                prevTrend = trendData.filter(d => {
+                const [y, m] = d.date.split('-');
+                return parseInt(y, 10) === prevYear && parseInt(m, 10) === prevMonth;
+                });
+                } else if (totalRange === 'year') {
+                const year = new Date().getFullYear();
+                periodTrend = trendData.filter(d => d.date.split('-')[0] == String(year));
+                prevTrend = trendData.filter(d => d.date.split('-')[0] == String(year - 1));
+                }
+
+                const periodTotalFromTrend = periodTrend.length ? sumAmounts(periodTrend) : null;
+                const prevTotalFromTrend = prevTrend.length ? sumAmounts(prevTrend) : null;
+
+                const periodTotal = periodTotalFromTrend !== null ? periodTotalFromTrend : (typeof total !== 'undefined'
+                ? total : (data.total_spend || 0));
+                const prevTotal = prevTotalFromTrend !== null ? prevTotalFromTrend : (data.total_previous || 0);
+
+                // Build per-category totals: prefer per-day category breakdown if present in trend entries
+                const hasPerDayCategory = periodTrend.some(d => d.categories && typeof d.categories === 'object');
+
+                const filteredCategories = {};
+
+                if (hasPerDayCategory) {
+                const keys = Object.keys(CATEGORY_MAP);
+                const currSums = {};
+                const prevSums = {};
+                keys.forEach(k => { currSums[k] = 0; prevSums[k] = 0; });
+
+                periodTrend.forEach(d => {
+                keys.forEach(k => { currSums[k] += sanitizeData(d.categories?.[k] || 0); });
+                });
+                prevTrend.forEach(d => {
+                keys.forEach(k => { prevSums[k] += sanitizeData(d.categories?.[k] || 0); });
+                });
+
+                keys.forEach(k => {
+                const current = currSums[k];
+                const previous = prevSums[k] || (current * 0.95);
+                const change = previous > 0 ? ((current - previous) / previous * 100) : 0;
+                filteredCategories[k] = { current, previous, change: change.toFixed(1) };
+                });
+
+                } else {
+                const categoryTotals = data.categories || {};
+                const categoryTotalsPrev = data.categories_previous || {};
+                const sumCategories = Object.values(categoryTotals).reduce((s, v) => s + (v || 0), 0) || 0;
+
+                Object.keys(CATEGORY_MAP).forEach(k => {
+                const share = sumCategories > 0 ? ((categoryTotals[k] || 0) / sumCategories) : (1 /
+                Object.keys(CATEGORY_MAP).length);
+                const current = periodTotal * share;
+                const prevCategoryBase = (categoryTotalsPrev && categoryTotalsPrev[k]) ? categoryTotalsPrev[k] :
+                (categoryTotals[k] || 0) * 0.95;
+                const prevBaseSum = Object.values(categoryTotalsPrev).reduce((s, v) => s + (v || 0), 0) ||
+                sumCategories;
+                const prevShare = prevBaseSum > 0 ? (prevCategoryBase / prevBaseSum) : share;
+                const previous = prevTotal * prevShare;
+                const change = previous > 0 ? ((current - previous) / previous * 100) : 0;
+                filteredCategories[k] = { current, previous, change: change.toFixed(1) };
+                });
+                }
+
+                // 5. Render Sections
+                renderCategoryStats(filteredCategories);
+                renderPieChart(filteredCategories);
+                renderLineChart(trendData, timeRange);
+                renderComparison(trendData);
+                renderHistoricalBarChart(trendData, timeRange);
+
+                }
+
+        </div>
+
+        <div class="chart-container">
+
+            <canvas id="lineChart"></canvas>
+
+        </div>
+
+    </div>
+
+    </div>
+
+
+
+    <div class="comparison-section">
+
+        <div class="chart-header">
+
+            <div class="chart-title">
+
+                <i class="fas fa-balance-scale"></i>
+
+                Comparison Metrics
 
             </div>
 
         </div>
 
+        <div class="comparison-grid" id="comparisonGrid">
+
+        </div>
+
+    </div>
 
 
-        <div class="alert" id="alertBanner">
 
-            <i class="fas fa-exclamation-triangle"></i>
+    <div class="chart-card">
 
-            <div>
+        <div class="chart-header">
 
-                <strong>Budget Alert!</strong>
+            <div class="chart-title">
 
-                <span id="alertMessage">Spending is approaching the threshold.</span>
+                <i class="fas fa-chart-area"></i>
+
+                Historical Cost Analysis (Daily)
 
             </div>
 
         </div>
 
+        <div class="chart-container">
 
-
-        <div class="total-card">
-
-            <div class="total-card-content">
-
-                <div class="total-label">Total AWS Spending</div>
-
-                <div style="margin-top:8px; margin-bottom:12px;">
-                    <label for="totalRangeSelect"
-                        style="font-size:0.9rem; color:var(--text-secondary); margin-right:8px;">Period:</label>
-                    <select id="totalRangeSelect"
-                        onchange="renderDashboard(rawData, document.getElementById('timeRangeLine').value)">
-                        <option value="7">Last 7 Days</option>
-                        <option value="14" selected>Last 14 Days</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                    </select>
-                </div>
-
-                <div class="total-amount" id="totalAmount">€0.00</div>
-
-                <div class="total-period" id="totalPeriod">Data Range: ...</div>
-
-
-
-                <div style="margin-top: 15px; max-width: 400px; margin-left: auto; margin-right: auto;">
-
-                    <div style="font-size: 0.9rem; margin-bottom: 5px; color: var(--text-secondary);">
-
-                        Budget Threshold: <span id="threshold">€500</span>
-
-                    </div>
-
-                    <div
-                        style="height: 20px; background-color: var(--border-color); border-radius: 10px; overflow: hidden;">
-
-                        <div id="spendProgress"
-                            style="height: 100%; background-color: var(--primary-color); width: 0%; text-align: right; padding-right: 5px; line-height: 20px; color: #fff; font-weight: 600; transition: width 1s ease-out, background-color 0.5s;">
-
-                            0%</div>
-
-                    </div>
-
-                </div>
-
-            </div>
+            <canvas id="barChart"></canvas>
 
         </div>
 
-
-
-        <div class="stats-grid" id="statsGrid">
-
-        </div>
-
-
-
-        <div class="charts-grid">
-
-            <div class="chart-card">
-
-                <div class="chart-header">
-
-                    <div class="chart-title">
-
-                        <i class="fas fa-chart-pie"></i>
-
-                        Cost Distribution
-
-                    </div>
-
-                    <select id="timeRangePie" onchange="loadCostData()">
-
-                        <option value="14" selected>Last 14 Days</option>
-
-                        <option value="7">Last 7 Days</option>
-
-                        <option value="30">Last 30 Days</option>
-
-                    </select>
-
-                </div>
-
-                <div class="chart-container">
-
-                    <canvas id="pieChart"></canvas>
-
-                </div>
-
-            </div>
-
-
-
-            <div class="chart-card">
-
-                <div class="chart-header">
-
-                    <div class="chart-title">
-
-                        <i class="fas fa-chart-line"></i>
-
-                        Spending Trend (Actual & Forecast)
-
-                    </div>
-
-                    <select id="timeRangeLine" onchange="loadCostData()">
-
-                        <option value="14" selected>Last 14 Days</option>
-
-                        <option value="7">Last 7 Days</option>
-
-                        <option value="30">Last 30 Days</option>
-
-                    </select>
-
-                </div>
-
-                <div class="chart-container">
-
-                    <canvas id="lineChart"></canvas>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <div class="comparison-section">
-
-            <div class="chart-header">
-
-                <div class="chart-title">
-
-                    <i class="fas fa-balance-scale"></i>
-
-                    Comparison Metrics
-
-                </div>
-
-            </div>
-
-            <div class="comparison-grid" id="comparisonGrid">
-
-            </div>
-
-        </div>
-
-
-
-        <div class="chart-card">
-
-            <div class="chart-header">
-
-                <div class="chart-title">
-
-                    <i class="fas fa-chart-area"></i>
-
-                    Historical Cost Analysis (Daily)
-
-                </div>
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="barChart"></canvas>
-
-            </div>
-
-        </div>
+    </div>
 
 
 
@@ -1492,31 +1551,31 @@
 
             // 4. Prepare Categories for Stats and Pie Chart
 
-            const filteredCategories = Object.keys(CATEGORY_MAP).reduce((acc, key) => {
+            const filteredCategories = computeCategoriesForPeriod(data, trendData, totalRange, typeof total !== 'undefined' ? total : (data.total_spend || 0));
 
-                const current = sanitizeData(data.categories[key]) || 0;
+            const current = sanitizeData(data.categories[key]) || 0;
 
-                // Use mocked previous value or estimate a simple change
+            // Use mocked previous value or estimate a simple change
 
-                const previous = sanitizeData(data.categories_previous?.[key]) || current * 0.95;
+            const previous = sanitizeData(data.categories_previous?.[key]) || current * 0.95;
 
-                const change = previous > 0 ? ((current - previous) / previous * 100) : 0;
+            const change = previous > 0 ? ((current - previous) / previous * 100) : 0;
 
 
 
-                acc[key] = {
+            acc[key] = {
 
-                    current: current,
+                current: current,
 
-                    previous: previous,
+                previous: previous,
 
-                    change: change.toFixed(1)
+                change: change.toFixed(1)
 
-                };
+            };
 
-                return acc;
+            return acc;
 
-            }, {});
+
 
 
 
