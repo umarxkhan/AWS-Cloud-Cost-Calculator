@@ -1384,7 +1384,9 @@
 
             // 1. Update Header
 
-            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+            const now = new Date();
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            document.getElementById('lastUpdated').textContent = now.toLocaleDateString('en-US', options);
 
             document.getElementById('totalPeriod').textContent = `Data for last ${timeRange} Days`;
 
@@ -1662,7 +1664,10 @@
 
 
 
-            const trendLabels = actualData.map(d => d.date.split('-').slice(1).join('/')); // MM/DD
+            const trendLabels = actualData.map(d => {
+                const [year, month, day] = d.date.split('-');
+                return `${day}.${month}`;
+            });
 
             const trendValues = actualData.map(d => d.amount);
 
@@ -1688,7 +1693,9 @@
 
                 lastDate.setDate(lastDate.getDate() + i);
 
-                forecastLabels.push(lastDate.toISOString().split('T')[0].split('-').slice(1).join('/'));
+                const isoString = lastDate.toISOString().split('T')[0];
+                const [year, month, day] = isoString.split('-');
+                forecastLabels.push(`${day}.${month}`);
 
             }
 
@@ -1868,7 +1875,10 @@
 
 
 
-            const labels = displayData.map(d => d.date.split('-').slice(1).join('/'));
+            const labels = displayData.map(d => {
+                const [year, month, day] = d.date.split('-');
+                return `${day}.${month}`;
+            });
 
             const values = displayData.map(d => d.amount);
 
