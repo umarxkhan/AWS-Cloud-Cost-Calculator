@@ -1,0 +1,349 @@
+{
+  "total_spend": 0.0,
+  "categories": {
+    "Compute": 0.0,
+    "Storage": 0.0,
+    "Database": 0.0,
+    "Networking": 0.0,
+    "Other": -0.0
+  },
+  "categories_previous": {
+    "Compute": 0.0,
+    "Storage": 0.0,
+    "Database": 0.0,
+    "Networking": 0.0,
+    "Other": 0.0
+  },
+  "trend": [
+    {
+      "date": "2025-10-18",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-19",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-20",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-21",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-22",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-23",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-24",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-25",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-26",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-27",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-28",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-29",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-30",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-10-31",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-01",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-02",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-03",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-04",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-05",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-06",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-07",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-08",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-09",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-10",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-11",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-12",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-13",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-14",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-15",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    },
+    {
+      "date": "2025-11-16",
+      "amount": 0.0,
+      "categories": {
+        "Compute": 0.0,
+        "Storage": 0.0,
+        "Database": 0.0,
+        "Networking": 0.0,
+        "Other": 0.0
+      }
+    }
+  ]
+}

@@ -142,12 +142,24 @@ def lambda_handler(event=None, context=None):
                 KeyConditionExpression=Key('record_date').eq(day_str)
             )
 
-            day_total = sum(float(item.get('cost', 0)) for item in response.get('Items', []))
-            trend.append({'date': day_str, 'amount': round(day_total, 2)})
+            items = response.get('Items', [])
+            # Build per-day category breakdown so dashboard can compute exact per-period categories
+            day_cat = init_categories()
+            day_total = 0.0
+            for item in items:
+                category = item.get('service_category', 'Other')
+                cost = float(item.get('cost', 0))
+                day_total += cost
+                if category in day_cat:
+                    day_cat[category] += cost
+
+            # Round values for readability in JSON
+            day_cat_rounded = {k: round(v, 2) for k, v in day_cat.items()}
+            trend.append({'date': day_str, 'amount': round(day_total, 2), 'categories': day_cat_rounded})
         except Exception as e:
             print(f"Warning: Could not query trend data for {day_str}: {e}")
             # Add zero if query fails
-            trend.append({'date': day_str, 'amount': 0.0})
+            trend.append({'date': day_str, 'amount': 0.0, 'categories': init_categories()})
 
     # --- 7. Build dashboard JSON (matching index.html expectations) ---
     dashboard_data = {
