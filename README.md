@@ -267,6 +267,7 @@ Terraform is used to automate the provisioning of all AWS resources for the dash
 
 ## License
 
-MIT License
+© 2025 Mubarak Ahmad Khan. All rights reserved.
+Licensed under the MIT License.
 
 ```
