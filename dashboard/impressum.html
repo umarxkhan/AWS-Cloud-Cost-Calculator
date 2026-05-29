@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impressum – Cloud Cost Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --dark-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }
+        [data-theme='dark'] {
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.7;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .toggle-theme {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.9rem;
+        }
+        .toggle-theme:hover { background-color: var(--primary-color); color: #fff; }
+        .legal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 60px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        h2 {
+            font-size: 1.15rem;
+            margin: 1.75rem 0 0.75rem;
+            color: var(--text-primary);
+        }
+        p, address { margin-bottom: 1rem; color: var(--text-secondary); font-style: normal; }
+        a { color: var(--primary-color); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { display: inline-block; margin-bottom: 1rem; font-size: 0.9rem; }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        @media (max-width: 768px) {
+            .toggle-theme { position: static; margin-bottom: 20px; }
+            .legal-card { padding: 24px; margin-top: 0; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <button class="toggle-theme" onclick="toggleTheme()">☀️ Toggle Theme</button>
+    <div class="container">
+        <div class="legal-card">
+            <a class="back-link" href="index.html">← Zurück zum Dashboard</a>
+            <h1>Impressum</h1>
+
+            <h2>Angaben gemäß § 5 TMG</h2>
+            <address>
+                Mubarak Ahmad Khan<br>
+                Moskauer Str. 124<br>
+                99427 Weimar<br>
+                Deutschland
+            </address>
+            <p>E-Mail: <a href="mailto:umar.mak@gmail.com">umar.mak@gmail.com</a></p>
+
+            <h2>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
+            <address>
+                Mubarak Ahmad Khan<br>
+                Moskauer Str. 124<br>
+                99427 Weimar<br>
+                Deutschland
+            </address>
+
+            <h2>Haftungsausschluss</h2>
+            <p><strong>Haftung für Inhalte</strong><br>
+            Die Inhalte dieser Website wurden mit größter Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden.</p>
+            <p><strong>Haftung für Links</strong><br>
+            Diese Website enthält Links zu externen Websites Dritter, auf deren Inhalte kein Einfluss besteht. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter verantwortlich.</p>
+        </div>
+        <footer>
+            <a href="index.html">Dashboard</a> ·
+            <a href="impressum.html">Impressum</a> ·
+            <a href="datenschutz.html">Datenschutz</a>
+        </footer>
+    </div>
+    <script>
+        function toggleTheme() {
+            const theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+        }
+        document.body.dataset.theme = localStorage.getItem('theme') || 'light';
+    </script>
+</body>
+</html>

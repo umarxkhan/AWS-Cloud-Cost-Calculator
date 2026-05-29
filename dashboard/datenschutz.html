@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datenschutzerklärung – Cloud Cost Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --dark-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+        }
+        [data-theme='dark'] {
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.7;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .toggle-theme {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.9rem;
+        }
+        .toggle-theme:hover { background-color: var(--primary-color); color: #fff; }
+        .legal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px;
+            margin-top: 60px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stand { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; }
+        h2 {
+            font-size: 1.15rem;
+            margin: 1.75rem 0 0.75rem;
+            color: var(--text-primary);
+        }
+        p, ul { margin-bottom: 1rem; color: var(--text-secondary); }
+        ul { padding-left: 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        a { color: var(--primary-color); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .back-link { display: inline-block; margin-bottom: 1rem; font-size: 0.9rem; }
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        @media (max-width: 768px) {
+            .toggle-theme { position: static; margin-bottom: 20px; }
+            .legal-card { padding: 24px; margin-top: 0; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <button class="toggle-theme" onclick="toggleTheme()">☀️ Toggle Theme</button>
+    <div class="container">
+        <div class="legal-card">
+            <a class="back-link" href="index.html">← Zurück zum Dashboard</a>
+            <h1>Datenschutzerklärung</h1>
+            <p class="stand">Stand: Mai 2026</p>
+
+            <h2>1. Verantwortlicher</h2>
+            <p>
+                Verantwortlicher im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:<br><br>
+                Mubarak Ahmad Khan<br>
+                Moskauer Str. 124<br>
+                99427 Weimar<br>
+                Deutschland<br>
+                E-Mail: <a href="mailto:umar.mak@gmail.com">umar.mak@gmail.com</a>
+            </p>
+
+            <h2>2. Allgemeine Hinweise</h2>
+            <p>
+                Diese Datenschutzerklärung informiert Sie über die Verarbeitung personenbezogener Daten
+                beim Besuch des Cloud Cost Calculator Dashboards. Personenbezogene Daten sind alle Daten,
+                mit denen Sie persönlich identifiziert werden können.
+            </p>
+            <p>
+                Das Dashboard dient der Anzeige von AWS-Kostendaten. Es werden keine Benutzerkonten
+                angelegt, keine Registrierung durchgeführt und keine Kontaktformulare bereitgestellt.
+            </p>
+
+            <h2>3. Hosting und Content Delivery</h2>
+            <p>
+                Diese Website wird über Amazon Web Services (AWS) bereitgestellt. Die statischen
+                Dateien werden in einem S3-Bucket gespeichert und über AWS CloudFront (Content
+                Delivery Network) ausgeliefert.
+            </p>
+            <p><strong>Anbieter:</strong> Amazon Web Services EMEA SARL, 38 Avenue John F. Kennedy, L-1855 Luxemburg<br>
+            (bzw. je nach Dienst Amazon Web Services, Inc., USA)</p>
+            <p>
+                Beim Aufruf der Website werden automatisch folgende Daten in Server-Logdateien verarbeitet:
+            </p>
+            <ul>
+                <li>IP-Adresse des anfragenden Geräts</li>
+                <li>Datum und Uhrzeit des Zugriffs</li>
+                <li>aufgerufene Seite/Datei</li>
+                <li>HTTP-Statuscode</li>
+                <li>Browsertyp und -version sowie Betriebssystem</li>
+                <li>Referrer-URL (sofern übermittelt)</li>
+            </ul>
+            <p>
+                <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
+                der sicheren, stabilen und fehlerfreien Bereitstellung der Website).<br>
+                <strong>Speicherdauer:</strong> Die Logdaten werden von AWS gemäß deren Richtlinien
+                gespeichert und anschließend gelöscht oder anonymisiert.
+            </p>
+            <p>
+                Eine Übermittlung von Daten in die USA kann im Rahmen der AWS-Dienste nicht ausgeschlossen
+                werden. AWS stützt sich hierbei auf Standardvertragsklauseln der EU-Kommission gemäß
+                Art. 46 Abs. 2 lit. c DSGVO.
+            </p>
+
+            <h2>4. Abruf von Kostendaten</h2>
+            <p>
+                Das Dashboard lädt eine JSON-Datei mit aggregierten AWS-Kostendaten von derselben
+                CloudFront-Domain. Dabei werden keine personenbezogenen Nutzerdaten übermittelt;
+                es handelt sich ausschließlich um technische Abrufe der öffentlich bereitgestellten
+                Kostendaten. Beim Abruf können jedoch – wie unter Abschnitt 3 beschrieben – technische
+                Zugriffsdaten (z. B. IP-Adresse) in Server-Logdateien verarbeitet werden.
+            </p>
+
+            <h2>5. Externe Ressourcen (CDNs)</h2>
+            <p>
+                Zur Darstellung der Website werden folgende externe Dienste eingebunden. Dabei kann
+                Ihre IP-Adresse an die jeweiligen Anbieter übermittelt werden:
+            </p>
+            <ul>
+                <li><strong>Google Fonts</strong> (fonts.googleapis.com, fonts.gstatic.com) – Schriftarten<br>
+                    Anbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland</li>
+                <li><strong>jsDelivr CDN</strong> (cdn.jsdelivr.net) – Chart.js-Bibliothek<br>
+                    Anbieter: jsDelivr (Prospect One Sp. z o.o., Polen)</li>
+                <li><strong>Cloudflare CDN</strong> (cdnjs.cloudflare.com) – Font Awesome Icons<br>
+                    Anbieter: Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA</li>
+            </ul>
+            <p>
+                <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
+                einer einheitlichen und funktionsfähigen Darstellung der Website). Bei Diensten mit
+                Sitz in Drittländern (insbesondere USA) erfolgt die Übermittlung auf Grundlage von
+                Standardvertragsklauseln der EU-Kommission, soweit der Anbieter diese anbietet.
+            </p>
+
+            <h2>6. Lokale Speicherung im Browser (localStorage)</h2>
+            <p>
+                Die Website speichert Ihre Theme-Einstellung (Hell/Dunkel) lokal in Ihrem Browser
+                unter dem Schlüssel „theme“ mittels localStorage. Diese Information wird ausschließlich
+                auf Ihrem Endgerät gespeichert und nicht an den Betreiber übermittelt.
+            </p>
+            <p>
+                <strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
+                der Speicherung Ihrer Anzeigeeinstellung für wiederkehrende Besuche). Es werden keine
+                Cookies zu Tracking- oder Werbezwecken gesetzt.
+            </p>
+
+            <h2>7. Keine Tracking- oder Analyse-Tools</h2>
+            <p>
+                Diese Website verwendet keine Webanalyse-Tools (z. B. Google Analytics), keine
+                Social-Media-Plugins und keine Werbe-Tracker. Es findet kein Profiling statt.
+            </p>
+
+            <h2>8. Ihre Rechte</h2>
+            <p>Sie haben gegenüber dem Verantwortlichen folgende Rechte:</p>
+            <ul>
+                <li><strong>Auskunft</strong> (Art. 15 DSGVO) über Ihre gespeicherten personenbezogenen Daten</li>
+                <li><strong>Berichtigung</strong> (Art. 16 DSGVO) unrichtiger Daten</li>
+                <li><strong>Löschung</strong> (Art. 17 DSGVO) Ihrer Daten</li>
+                <li><strong>Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO)</li>
+                <li><strong>Datenübertragbarkeit</strong> (Art. 20 DSGVO), soweit anwendbar</li>
+                <li><strong>Widerspruch</strong> (Art. 21 DSGVO) gegen die Verarbeitung auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO</li>
+                <li><strong>Widerruf</strong> erteilter Einwilligungen (Art. 7 Abs. 3 DSGVO) mit Wirkung für die Zukunft</li>
+            </ul>
+            <p>
+                Zur Ausübung Ihrer Rechte wenden Sie sich bitte an:
+                <a href="mailto:umar.mak@gmail.com">umar.mak@gmail.com</a>
+            </p>
+
+            <h2>9. Beschwerderecht bei einer Aufsichtsbehörde</h2>
+            <p>
+                Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.
+                Zuständig für Thüringen ist:
+            </p>
+            <p>
+                Thüringer Landesbeauftragter für den Datenschutz und die Informationsfreiheit (TLfDI)<br>
+                Häßlerstraße 8<br>
+                99096 Erfurt<br>
+                Deutschland<br>
+                Website: <a href="https://www.tlfdi.thueringen.de" target="_blank" rel="noopener noreferrer">www.tlfdi.thueringen.de</a>
+            </p>
+
+            <h2>10. Änderungen dieser Datenschutzerklärung</h2>
+            <p>
+                Der Betreiber behält sich vor, diese Datenschutzerklärung anzupassen, um sie an
+                geänderte Rechtslagen oder bei Änderungen des Dienstes sowie der Datenverarbeitung
+                anzupassen. Es gilt die jeweils auf dieser Seite veröffentlichte Fassung.
+            </p>
+        </div>
+        <footer>
+            <a href="index.html">Dashboard</a> ·
+            <a href="impressum.html">Impressum</a> ·
+            <a href="datenschutz.html">Datenschutz</a>
+        </footer>
+    </div>
+    <script>
+        function toggleTheme() {
+            const theme = document.body.dataset.theme === 'light' ? 'dark' : 'light';
+            document.body.dataset.theme = theme;
+            localStorage.setItem('theme', theme);
+        }
+        document.body.dataset.theme = localStorage.getItem('theme') || 'light';
+    </script>
+</body>
+</html>
